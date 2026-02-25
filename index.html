@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeRescue AI — 911 for Developers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="bg-grid"></div>
+    <div id="particles-container"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <span class="logo-icon">🚨</span>
+                <span class="logo-text">CodeRescue<span class="logo-ai">AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#severity" class="nav-link">Severity</a>
+                <a href="#stats" class="nav-link">Impact</a>
+                <a href="#team" class="nav-link">Team</a>
+            </div>
+            <div class="nav-actions">
+                <a href="dashboard.html" class="btn btn-primary btn-glow">
+                    <span class="btn-icon">⚡</span> Launch Dashboard
+                </a>
+                <button class="mobile-toggle" id="mobileToggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg-effects">
+            <div class="hero-orb hero-orb-1"></div>
+            <div class="hero-orb hero-orb-2"></div>
+            <div class="hero-orb hero-orb-3"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge animate-fade-up">
+                    <span class="badge-dot"></span>
+                    AI For Bharat 2026 — Student Track
+                </div>
+                <h1 class="hero-title animate-fade-up delay-1">
+                    When Your Code <span class="text-gradient">Breaks</span>,<br>
+                    We Respond Faster<br>
+                    Than <span class="text-red-glow">911</span>
+                </h1>
+                <p class="hero-subtitle animate-fade-up delay-2">
+                    CodeRescue AI applies emergency dispatch principles to developer support. 
+                    AI triages in <strong>&lt;30 seconds</strong>, auto-resolves <strong>60–70%</strong> instantly, 
+                    and routes complex issues to experts with voice, video & screen-share.
+                </p>
+                <div class="hero-buttons animate-fade-up delay-3">
+                    <a href="dashboard.html" class="btn btn-large btn-primary btn-glow">
+                        <span class="btn-icon">🚨</span> Hit the Panic Button
+                    </a>
+                    <a href="#how-it-works" class="btn btn-large btn-outline">
+                        See How It Works →
+                    </a>
+                </div>
+                <div class="hero-stats animate-fade-up delay-4">
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" data-count="30">&lt;30</span>
+                        <span class="hero-stat-label">Second Triage</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" data-count="70">60-70%</span>
+                        <span class="hero-stat-label">Auto-Resolved</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number" data-count="10">10+</span>
+                        <span class="hero-stat-label">Languages</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-number">24/7</span>
+                        <span class="hero-stat-label">Available</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual animate-fade-up delay-2">
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <span class="dot dot-red"></span>
+                            <span class="dot dot-yellow"></span>
+                            <span class="dot dot-green"></span>
+                        </div>
+                        <span class="terminal-title">terminal — rescue.ai</span>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="terminal-line" id="typeLine1">
+                            <span class="terminal-prompt">$</span>
+                            <span class="terminal-text typing" data-text="coderescue --panic"></span>
+                        </div>
+                        <div class="terminal-line hidden" id="typeLine2">
+                            <span class="terminal-output text-yellow">⚡ Capturing context...</span>
+                        </div>
+                        <div class="terminal-line hidden" id="typeLine3">
+                            <span class="terminal-output text-blue">🔍 Analyzing error: TypeError in app.js:142</span>
+                        </div>
+                        <div class="terminal-line hidden" id="typeLine4">
+                            <span class="terminal-output text-orange">🏷️  Severity: P3 (Low) — AI can handle this</span>
+                        </div>
+                        <div class="terminal-line hidden" id="typeLine5">
+                            <span class="terminal-output text-green">✅ Solution found in 4.2 seconds</span>
+                        </div>
+                        <div class="terminal-line hidden" id="typeLine6">
+                            <span class="terminal-output text-purple">📚 Auto-documented in knowledge base</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="section problem-section" id="problem">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">The Problem</span>
+                <h2 class="section-title">Developers Are <span class="text-gradient">Drowning</span></h2>
+                <p class="section-desc">Critical issues pile up while help is fragmented, slow, and expensive.</p>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card glass-card animate-on-scroll">
+                    <div class="problem-icon">⏱️</div>
+                    <h3 class="problem-title">2-4 Hours Wasted Daily</h3>
+                    <p class="problem-desc">Developers search 5-10 fragmented platforms for answers while their flow state shatters.</p>
+                    <div class="problem-stat">
+                        <div class="stat-bar"><div class="stat-fill" data-width="60"></div></div>
+                        <span>60% of developers affected</span>
+                    </div>
+                </div>
+                <div class="problem-card glass-card animate-on-scroll">
+                    <div class="problem-icon">💸</div>
+                    <h3 class="problem-title">$5,600/Min Downtime</h3>
+                    <p class="problem-desc">Production incidents drain money while teams scramble without an organized response system.</p>
+                    <div class="problem-stat">
+                        <div class="stat-bar"><div class="stat-fill" data-width="85"></div></div>
+                        <span>$300B lost annually</span>
+                    </div>
+                </div>
+                <div class="problem-card glass-card animate-on-scroll">
+                    <div class="problem-icon">📉</div>
+                    <h3 class="problem-title">40% Student Dropout</h3>
+                    <p class="problem-desc">Learners stuck at 2 AM with no one to ask. Frustration kills motivation before mastery.</p>
+                    <div class="problem-stat">
+                        <div class="stat-bar"><div class="stat-fill" data-width="40"></div></div>
+                        <span>40% dropout rate</span>
+                    </div>
+                </div>
+                <div class="problem-card glass-card animate-on-scroll">
+                    <div class="problem-icon">🌍</div>
+                    <h3 class="problem-title">Language Barriers</h3>
+                    <p class="problem-desc">Non-English speakers struggle with technical docs. Help should speak every language.</p>
+                    <div class="problem-stat">
+                        <div class="stat-bar"><div class="stat-fill" data-width="70"></div></div>
+                        <span>27M devs worldwide</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section features-section" id="features">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Core Features</span>
+                <h2 class="section-title">Built for <span class="text-gradient">Real Emergencies</span></h2>
+                <p class="section-desc">Every feature designed using 911 emergency dispatch principles.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card glass-card animate-on-scroll">
+                    <div class="feature-icon-wrap">
+                        <div class="feature-icon">🚨</div>
+                        <div class="feature-icon-glow"></div>
+                    </div>
+                    <h3>Panic Button</h3>
+                    <p>One-click IDE integration captures code, errors, and environment context instantly. No copy-pasting, no explaining.</p>
+                </div>
+                <div class="feature-card glass-card animate-on-scroll">
+                    <div class="feature-icon-wrap">
+                        <div class="feature-icon">🧠</div>
+                        <div class="feature-icon-glow"></div>
+                    </div>
+                    <h3>AI Triage Engine</h3>
+                    <p>Classifies severity in &lt;30s (P0 Critical → P4 Learning) using multi-model analysis. No false alarms.</p>
+                </div>
+                <div class="feature-card glass-card animate-on-scroll">
+                    <div class="feature-icon-wrap">
+                        <div class="feature-icon">🤖</div>
+                        <div class="feature-icon-glow"></div>
+                    </div>
+                    <h3>Instant AI Resolution</h3>
+                    <p>60-70% of issues resolved automatically by AI bot with contextual code fixes, explanations, and learning paths.</p>
+                </div>
+                <div class="feature-card glass-card animate-on-scroll">
+                    <div class="feature-icon-wrap">
+                        <div class="feature-icon">📹</div>
+                        <div class="feature-icon-glow"></div>
+                    </div>
+                    <h3>Multi-Modal Communication</h3>
+                    <p>Voice calls, video chat, screen sharing, and live code collaboration with human experts when AI can't solve it.</p>
+                </div>
+                <div class="feature-card glass-card animate-on-scroll">
+                    <div class="feature-icon-wrap">
+                        <div class="feature-icon">📚</div>
+                        <div class="feature-icon-glow"></div>
+                    </div>
+                    <h3>Auto-Documentation</h3>
+                    <p>Every solution automatically documented in a searchable knowledge base. Your team never solves the same problem twice.</p>
+                </div>
+                <div class="feature-card glass-card animate-on-scroll">
+                    <div class="feature-icon-wrap">
+                        <div class="feature-icon">🌐</div>
+                        <div class="feature-icon-glow"></div>
+                    </div>
+                    <h3>10+ Languages</h3>
+                    <p>Real-time translation for code comments, documentation, and live conversations. Help in your native language.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section how-section" id="how-it-works">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">How It Works</span>
+                <h2 class="section-title">From <span class="text-gradient">Panic</span> to <span class="text-gradient">Solution</span></h2>
+                <p class="section-desc">Six steps, under 30 seconds, fully automated.</p>
+            </div>
+            <div class="steps-timeline">
+                <div class="timeline-line"></div>
+                <div class="step-item animate-on-scroll">
+                    <div class="step-number">01</div>
+                    <div class="step-card glass-card">
+                        <div class="step-icon">🔴</div>
+                        <h3>Hit Panic Button</h3>
+                        <p>Developer presses the panic button in their IDE or web dashboard when stuck on a bug or facing an emergency.</p>
+                    </div>
+                </div>
+                <div class="step-item animate-on-scroll">
+                    <div class="step-number">02</div>
+                    <div class="step-card glass-card">
+                        <div class="step-icon">📸</div>
+                        <h3>Context Captured</h3>
+                        <p>AI automatically captures code files, error logs, stack traces, environment info, and recent changes.</p>
+                    </div>
+                </div>
+                <div class="step-item animate-on-scroll">
+                    <div class="step-number">03</div>
+                    <div class="step-card glass-card">
+                        <div class="step-icon">🧠</div>
+                        <h3>AI Analyzes & Triages</h3>
+                        <p>Multi-model AI engine classifies the problem severity (P0-P4) and identifies root cause in under 30 seconds.</p>
+                    </div>
+                </div>
+                <div class="step-item animate-on-scroll">
+                    <div class="step-number">04</div>
+                    <div class="step-card glass-card">
+                        <div class="step-icon">🔀</div>
+                        <h3>Smart Routing</h3>
+                        <p>Simple issues → AI bot. Complex issues → matched human expert. Critical → emergency team alert with on-call rotation.</p>
+                    </div>
+                </div>
+                <div class="step-item animate-on-scroll">
+                    <div class="step-number">05</div>
+                    <div class="step-card glass-card">
+                        <div class="step-icon">💬</div>
+                        <h3>Multi-Modal Response</h3>
+                        <p>Get help through AI chat, voice call, video conference, screen share, or live code collaboration — whatever works best.</p>
+                    </div>
+                </div>
+                <div class="step-item animate-on-scroll">
+                    <div class="step-number">06</div>
+                    <div class="step-card glass-card">
+                        <div class="step-icon">📖</div>
+                        <h3>Auto-Documented</h3>
+                        <p>Solution automatically saved to knowledge base with tags, translations, and related issues. Never solve the same bug twice.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Severity Levels Section -->
+    <section class="section severity-section" id="severity">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Severity System</span>
+                <h2 class="section-title">Intelligent <span class="text-gradient">Triage</span> Classification</h2>
+                <p class="section-desc">Every issue gets the right priority. Every developer gets the right response.</p>
+            </div>
+            <div class="severity-grid">
+                <div class="severity-card glass-card severity-p0 animate-on-scroll">
+                    <div class="severity-header">
+                        <span class="severity-badge p0">P0</span>
+                        <span class="severity-label">CRITICAL</span>
+                    </div>
+                    <div class="severity-pulse p0-pulse"></div>
+                    <h3>Production Down</h3>
+                    <p>System-wide outage affecting all users. Revenue loss active.</p>
+                    <div class="severity-response">
+                        <span class="response-icon">⚡</span>
+                        <span>Emergency team alert — &lt;60s response</span>
+                    </div>
+                </div>
+                <div class="severity-card glass-card severity-p1 animate-on-scroll">
+                    <div class="severity-header">
+                        <span class="severity-badge p1">P1</span>
+                        <span class="severity-label">HIGH</span>
+                    </div>
+                    <h3>Major Feature Broken</h3>
+                    <p>Critical functionality impacted. Workaround may exist but degraded experience.</p>
+                    <div class="severity-response">
+                        <span class="response-icon">👤</span>
+                        <span>Expert notification — &lt;5min response</span>
+                    </div>
+                </div>
+                <div class="severity-card glass-card severity-p2 animate-on-scroll">
+                    <div class="severity-header">
+                        <span class="severity-badge p2">P2</span>
+                        <span class="severity-label">MEDIUM</span>
+                    </div>
+                    <h3>Bug or Blocker</h3>
+                    <p>Development blocked on a specific issue. Needs expert input to unblock.</p>
+                    <div class="severity-response">
+                        <span class="response-icon">🤖</span>
+                        <span>AI + Human queue — &lt;15min response</span>
+                    </div>
+                </div>
+                <div class="severity-card glass-card severity-p3 animate-on-scroll">
+                    <div class="severity-header">
+                        <span class="severity-badge p3">P3</span>
+                        <span class="severity-label">LOW</span>
+                    </div>
+                    <h3>Quick Question</h3>
+                    <p>Simple question about syntax, API usage, or best practices.</p>
+                    <div class="severity-response">
+                        <span class="response-icon">💡</span>
+                        <span>AI + Docs — Instant resolution</span>
+                    </div>
+                </div>
+                <div class="severity-card glass-card severity-p4 animate-on-scroll">
+                    <div class="severity-header">
+                        <span class="severity-badge p4">P4</span>
+                        <span class="severity-label">LEARNING</span>
+                    </div>
+                    <h3>Learning & Growth</h3>
+                    <p>Concept explanations, tutorials, and guided learning paths for students.</p>
+                    <div class="severity-response">
+                        <span class="response-icon">📖</span>
+                        <span>AI tutor — Personalized guidance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section stats-section" id="stats">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Impact</span>
+                <h2 class="section-title">The Numbers <span class="text-gradient">Speak</span></h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card glass-card animate-on-scroll">
+                    <div class="stat-value" data-count="10">10<span class="stat-suffix">x</span></div>
+                    <div class="stat-label">Faster than traditional support</div>
+                </div>
+                <div class="stat-card glass-card animate-on-scroll">
+                    <div class="stat-value" data-count="70">70<span class="stat-suffix">%</span></div>
+                    <div class="stat-label">Issues auto-resolved by AI</div>
+                </div>
+                <div class="stat-card glass-card animate-on-scroll">
+                    <div class="stat-value" data-count="300">300<span class="stat-suffix">B</span></div>
+                    <div class="stat-label">Annual productivity loss addressed</div>
+                </div>
+                <div class="stat-card glass-card animate-on-scroll">
+                    <div class="stat-value" data-count="27">27<span class="stat-suffix">M</span></div>
+                    <div class="stat-label">Developers worldwide impacted</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Preview -->
+    <section class="section arch-section" id="architecture">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Architecture</span>
+                <h2 class="section-title">Built to <span class="text-gradient">Scale</span></h2>
+                <p class="section-desc">Microservices-based platform with 99.9% uptime and &lt;30s response time.</p>
+            </div>
+            <div class="arch-diagram glass-card animate-on-scroll">
+                <div class="arch-layer">
+                    <div class="arch-layer-label">Client Layer</div>
+                    <div class="arch-nodes">
+                        <div class="arch-node glass-card-inner"><span>🌐</span>Web App</div>
+                        <div class="arch-node glass-card-inner"><span>⚡</span>IDE Extension</div>
+                        <div class="arch-node glass-card-inner"><span>📱</span>Mobile App</div>
+                        <div class="arch-node glass-card-inner"><span>🎙️</span>Voice Interface</div>
+                    </div>
+                </div>
+                <div class="arch-arrow">▼</div>
+                <div class="arch-layer">
+                    <div class="arch-layer-label">API Gateway</div>
+                    <div class="arch-nodes">
+                        <div class="arch-node glass-card-inner"><span>🔒</span>Auth & Rate Limiting</div>
+                        <div class="arch-node glass-card-inner"><span>⚖️</span>Load Balancing</div>
+                        <div class="arch-node glass-card-inner"><span>🔗</span>Request Routing</div>
+                    </div>
+                </div>
+                <div class="arch-arrow">▼</div>
+                <div class="arch-layer">
+                    <div class="arch-layer-label">Core Services</div>
+                    <div class="arch-nodes">
+                        <div class="arch-node glass-card-inner pulse-glow"><span>🧠</span>AI Triage</div>
+                        <div class="arch-node glass-card-inner pulse-glow"><span>🔀</span>Smart Routing</div>
+                        <div class="arch-node glass-card-inner pulse-glow"><span>📹</span>WebRTC Comms</div>
+                        <div class="arch-node glass-card-inner pulse-glow"><span>📚</span>Knowledge Base</div>
+                    </div>
+                </div>
+                <div class="arch-arrow">▼</div>
+                <div class="arch-layer">
+                    <div class="arch-layer-label">Data Layer</div>
+                    <div class="arch-nodes">
+                        <div class="arch-node glass-card-inner"><span>🐘</span>PostgreSQL</div>
+                        <div class="arch-node glass-card-inner"><span>🍃</span>MongoDB</div>
+                        <div class="arch-node glass-card-inner"><span>⚡</span>Redis</div>
+                        <div class="arch-node glass-card-inner"><span>🧲</span>Vector DB</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="section team-section" id="team">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">Team DDoxers</span>
+                <h2 class="section-title">The <span class="text-gradient">Builders</span></h2>
+            </div>
+            <div class="team-grid">
+                <div class="team-card glass-card animate-on-scroll">
+                    <div class="team-avatar">
+                        <div class="avatar-placeholder">AK</div>
+                    </div>
+                    <h3>Avanish Kasar</h3>
+                    <p class="team-role">Team Leader</p>
+                    <p class="team-desc">Leading the vision of CodeRescue AI — building the 911 system developers deserve.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta-section">
+        <div class="container">
+            <div class="cta-card glass-card animate-on-scroll">
+                <div class="cta-bg-effects">
+                    <div class="cta-orb cta-orb-1"></div>
+                    <div class="cta-orb cta-orb-2"></div>
+                </div>
+                <div class="cta-content">
+                    <h2>Ready to Never Be Stuck Again?</h2>
+                    <p>Experience the future of developer support. Hit the panic button and get help in seconds, not hours.</p>
+                    <a href="dashboard.html" class="btn btn-large btn-primary btn-glow">
+                        <span class="btn-icon">🚨</span> Launch CodeRescue AI
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="logo-icon">🚨</span>
+                    <span class="logo-text">CodeRescue<span class="logo-ai">AI</span></span>
+                    <p>When your code breaks, we respond faster than 911.</p>
+                </div>
+                <div class="footer-info">
+                    <p>Team DDoxers — AI For Bharat 2026</p>
+                    <p>Led by Avanish Kasar</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 CodeRescue AI. Built with ❤️ for developers everywhere.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
