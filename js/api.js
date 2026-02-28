@@ -86,6 +86,6 @@ async function checkAPIHealth() {
 if (API_CONFIG.endpoint) {
     checkAPIHealth().then(ok => {
         if (ok) console.log('✅ CodeRescue API connected:', API_CONFIG.endpoint);
-        else console.log('⚠️ API not reachable, using local fallbacks');
+        else console.log('API not reachable, using local fallbacks');
     });
 }

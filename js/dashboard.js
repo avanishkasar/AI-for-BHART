@@ -44,7 +44,7 @@ function initPanicButton() {
         card.classList.add('panic-active');
         state.isTriaging = true;
         
-        addActivity('🚨 Panic button pressed — initiating triage');
+        addActivity('Panic button pressed — initiating triage');
         startTriage();
         
         setTimeout(() => {
@@ -66,7 +66,7 @@ function startTriage() {
     progressBar.style.width = '0%';
     steps.forEach(s => {
         s.classList.remove('active', 'done');
-        s.querySelector('.triage-step-status').textContent = '⏳';
+        s.querySelector('.triage-step-status').textContent = '·';
     });
     result.style.display = 'none';
     stepsContainer.style.display = 'block';
@@ -86,12 +86,12 @@ function startTriage() {
         if (stepIndex > 0) {
             steps[stepIndex - 1].classList.remove('active');
             steps[stepIndex - 1].classList.add('done');
-            steps[stepIndex - 1].querySelector('.triage-step-status').textContent = '✅';
+            steps[stepIndex - 1].querySelector('.triage-step-status').textContent = '✓';
         }
         
         if (stepIndex < steps.length) {
             steps[stepIndex].classList.add('active');
-            steps[stepIndex].querySelector('.triage-step-status').textContent = '⚙️';
+            steps[stepIndex].querySelector('.triage-step-status').textContent = '…';
             progressBar.style.width = ((stepIndex + 1) / steps.length * 100) + '%';
             stepIndex++;
         } else {
@@ -109,7 +109,7 @@ function startTriage() {
                 severityEl.textContent = `${chosen.level} — ${chosen.label}`;
                 messageEl.textContent = chosen.msg;
                 
-                addActivity(`🏷️ Triage complete: ${chosen.level} ${chosen.label}`);
+                addActivity(`Triage complete: ${chosen.level} ${chosen.label}`);
                 
                 // Add incident
                 addIncident(chosen);
@@ -125,8 +125,8 @@ function startTriage() {
         
         // Auto-send a message from AI
         clearChat();
-        addMessage('ai', `🏷️ **Severity: ${chosen.level} (${chosen.label})**\n\n${chosen.msg}\n\nI've captured your context and I'm ready to help. Can you describe the issue you're facing? Or paste the error message below.`);
-        addActivity('🤖 AI assistant engaged');
+        addMessage('ai', `**Severity: ${chosen.level} (${chosen.label})**\n\n${chosen.msg}\n\nI've captured your context and I'm ready to help. Can you describe the issue you're facing? Or paste the error message below.`);
+        addActivity('AI assistant engaged');
     };
 }
 
@@ -167,7 +167,7 @@ function sendMessage() {
     input.value = '';
     input.style.height = 'auto';
     
-    addActivity(`💬 User: "${text.substring(0, 40)}${text.length > 40 ? '...' : ''}"`);
+addActivity(`User: "${text.substring(0, 40)}${text.length > 40 ? '...' : ''}"`);
     
     // Show typing indicator then respond
     showTypingIndicator();
@@ -177,14 +177,14 @@ function sendMessage() {
         removeTypingIndicator();
         const response = apiResult.fromAPI ? apiResult.response : generateAIResponse(text);
         addMessage('ai', response);
-        addActivity(`🤖 AI response generated${apiResult.fromAPI ? ' (Bedrock)' : ''}`);
+        addActivity(`AI response generated${apiResult.fromAPI ? ' (Bedrock)' : ''}`);
         state.resolvedCount++;
         updateCounters();
     }).catch(() => {
         removeTypingIndicator();
         const response = generateAIResponse(text);
         addMessage('ai', response);
-        addActivity('🤖 AI response generated');
+        addActivity('AI response generated');
         state.resolvedCount++;
         updateCounters();
     });
@@ -198,7 +198,7 @@ function addMessage(type, content) {
     
     const avatar = document.createElement('div');
     avatar.className = `msg-avatar ${type === 'ai' ? 'ai' : 'human'}`;
-    avatar.textContent = type === 'ai' ? '🤖' : '👤';
+    avatar.textContent = type === 'ai' ? 'AI' : 'U';
     
     const contentEl = document.createElement('div');
     contentEl.className = 'msg-content';
@@ -232,7 +232,7 @@ function showTypingIndicator() {
     typing.id = 'typingIndicator';
     
     typing.innerHTML = `
-        <div class="msg-avatar ai">🤖</div>
+        <div class="msg-avatar ai">AI</div>
         <div class="msg-content">
             <div class="typing-indicator">
                 <span></span><span></span><span></span>
@@ -259,27 +259,27 @@ function generateAIResponse(userMessage) {
     const lower = userMessage.toLowerCase();
     
     if (lower.includes('typeerror') || lower.includes('type error')) {
-        return `**🔍 TypeError Detected**\n\nBased on the context I captured, here's what's happening:\n\nThe error occurs because you're trying to access a property on \`undefined\`. This commonly happens when:\n\n1. An API response doesn't have the expected structure\n2. A state variable hasn't been initialized\n3. An async operation hasn't completed yet\n\n**Quick Fix:**\n\`\`\`javascript\n// Add optional chaining\nconst value = data?.property?.nested ?? 'default';\n\`\`\`\n\n**Prevention:** Always validate data before accessing nested properties. Would you like me to review the specific file?`;
+        return `**TypeError Detected**\n\nBased on the context I captured, here's what's happening:\n\nThe error occurs because you're trying to access a property on \`undefined\`. This commonly happens when:\n\n1. An API response doesn't have the expected structure\n2. A state variable hasn't been initialized\n3. An async operation hasn't completed yet\n\n**Quick Fix:**\n\`\`\`javascript\n// Add optional chaining\nconst value = data?.property?.nested ?? 'default';\n\`\`\`\n\n**Prevention:** Always validate data before accessing nested properties. Would you like me to review the specific file?`;
     }
     
     if (lower.includes('500') || lower.includes('api') || lower.includes('endpoint') || lower.includes('server')) {
-        return `**🔍 Server Error Analysis**\n\nA 500 error means something went wrong on the server side. Let me help you debug:\n\n**Common causes:**\n1. Unhandled exception in route handler\n2. Database connection timeout\n3. Missing environment variables\n4. Malformed request body\n\n**Debugging steps:**\n\`\`\`bash\n# Check server logs\ntail -f logs/error.log\n\n# Test endpoint directly\ncurl -X POST http://localhost:3000/api/endpoint \\\n  -H "Content-Type: application/json" \\\n  -d '{"test": true}'\n\`\`\`\n\nWould you like me to analyze your server logs or route handler code?`;
+        return `**Server Error Analysis**\n\nA 500 error means something went wrong on the server side. Let me help you debug:\n\n**Common causes:**\n1. Unhandled exception in route handler\n2. Database connection timeout\n3. Missing environment variables\n4. Malformed request body\n\n**Debugging steps:**\n\`\`\`bash\n# Check server logs\ntail -f logs/error.log\n\n# Test endpoint directly\ncurl -X POST http://localhost:3000/api/endpoint \\\n  -H "Content-Type: application/json" \\\n  -d '{"test": true}'\n\`\`\`\n\nWould you like me to analyze your server logs or route handler code?`;
     }
     
     if (lower.includes('async') || lower.includes('await') || lower.includes('promise')) {
-        return `**📖 Async/Await Guide**\n\nGreat question! Here's how async/await works in JavaScript:\n\n**Key Concepts:**\n\n1. **\`async\`** — Declares a function returns a Promise\n2. **\`await\`** — Pauses execution until Promise resolves\n3. **Error handling** — Use try/catch with async/await\n\n**Example:**\n\`\`\`javascript\nasync function fetchUserData(userId) {\n  try {\n    const response = await fetch(\`/api/users/\${userId}\`);\n    const data = await response.json();\n    return data;\n  } catch (error) {\n    console.error('Failed to fetch:', error);\n    throw error;\n  }\n}\n\`\`\`\n\n**Common Pitfall:** Don't forget to \`await\` async calls — without it you get a Promise object instead of the value!\n\nWant me to explain more about Promise chaining or error handling patterns?`;
+        return `**Async/Await Guide**\n\nGreat question! Here's how async/await works in JavaScript:\n\n**Key Concepts:**\n\n1. **\`async\`** — Declares a function returns a Promise\n2. **\`await\`** — Pauses execution until Promise resolves\n3. **Error handling** — Use try/catch with async/await\n\n**Example:**\n\`\`\`javascript\nasync function fetchUserData(userId) {\n  try {\n    const response = await fetch(\`/api/users/\${userId}\`);\n    const data = await response.json();\n    return data;\n  } catch (error) {\n    console.error('Failed to fetch:', error);\n    throw error;\n  }\n}\n\`\`\`\n\n**Common Pitfall:** Don't forget to \`await\` async calls — without it you get a Promise object instead of the value!\n\nWant me to explain more about Promise chaining or error handling patterns?`;
     }
     
     if (lower.includes('slow') || lower.includes('performance') || lower.includes('database') || lower.includes('query')) {
-        return `**⚡ Performance Analysis**\n\nSlow database queries are a common bottleneck. Here's my diagnostic approach:\n\n**Quick Wins:**\n1. **Add indexes** on frequently queried columns\n2. **Avoid N+1 queries** — use eager loading/joins\n3. **Implement pagination** — never fetch all records\n4. **Cache frequent queries** with Redis\n\n**Diagnostic Query:**\n\`\`\`sql\nEXPLAIN ANALYZE SELECT * FROM users \nWHERE status = 'active' \nORDER BY created_at DESC;\n\`\`\`\n\nThis will show you the query execution plan and where time is being spent.\n\nWould you like me to analyze your specific query or suggest an indexing strategy?`;
+        return `**Performance Analysis**\n\nSlow database queries are a common bottleneck. Here's my diagnostic approach:\n\n**Quick Wins:**\n1. **Add indexes** on frequently queried columns\n2. **Avoid N+1 queries** — use eager loading/joins\n3. **Implement pagination** — never fetch all records\n4. **Cache frequent queries** with Redis\n\n**Diagnostic Query:**\n\`\`\`sql\nEXPLAIN ANALYZE SELECT * FROM users \nWHERE status = 'active' \nORDER BY created_at DESC;\n\`\`\`\n\nThis will show you the query execution plan and where time is being spent.\n\nWould you like me to analyze your specific query or suggest an indexing strategy?`;
     }
     
     if (lower.includes('cors')) {
-        return `**🔧 CORS Fix**\n\nCORS errors happen when the browser blocks requests to a different origin. Here's the fix:\n\n**For Express.js:**\n\`\`\`javascript\nconst cors = require('cors');\n\napp.use(cors({\n  origin: 'http://localhost:3000',\n  methods: ['GET', 'POST', 'PUT', 'DELETE'],\n  credentials: true\n}));\n\`\`\`\n\n**Key points:**\n- Set the \`origin\` to your frontend URL\n- Include \`credentials: true\` if using cookies\n- Add all HTTP methods your API uses\n\n✅ Solution auto-documented in knowledge base.`;
+        return `**CORS Fix**\n\nCORS errors happen when the browser blocks requests to a different origin. Here's the fix:\n\n**For Express.js:**\n\`\`\`javascript\nconst cors = require('cors');\n\napp.use(cors({\n  origin: 'http://localhost:3000',\n  methods: ['GET', 'POST', 'PUT', 'DELETE'],\n  credentials: true\n}));\n\`\`\`\n\n**Key points:**\n- Set the \`origin\` to your frontend URL\n- Include \`credentials: true\` if using cookies\n- Add all HTTP methods your API uses\n\nSolution auto-documented in knowledge base.`;
     }
     
     // Generic response
-    return `**🤖 Analyzing your issue...**\n\nI've processed your description. Here's my analysis:\n\n**Severity Assessment:** This appears to be a P3 (Low) issue that I can help resolve.\n\n**What I found:**\n- The issue is likely related to a configuration or logic error\n- Similar issues have been resolved ${Math.floor(Math.random() * 50 + 10)} times in our knowledge base\n\n**Recommended next steps:**\n1. Share the exact error message or stack trace\n2. Paste the relevant code snippet\n3. Tell me what you expected vs. what happened\n\nThe more context you provide, the faster I can pinpoint the root cause. You can also use the **📋 Paste Error Log** quick action on the left.\n\n💡 *Tip: Hit the panic button for automatic context capture from your IDE!*`;
+    return `**Analyzing your issue...**\n\nI've processed your description. Here's my analysis:\n\n**Severity Assessment:** This appears to be a P3 (Low) issue that I can help resolve.\n\n**What I found:**\n- The issue is likely related to a configuration or logic error\n- Similar issues have been resolved ${Math.floor(Math.random() * 50 + 10)} times in our knowledge base\n\n**Recommended next steps:**\n1. Share the exact error message or stack trace\n2. Paste the relevant code snippet\n3. Tell me what you expected vs. what happened\n\nThe more context you provide, the faster I can pinpoint the root cause. You can also use the **Paste Error Log** quick action on the left.\n\n*Tip: Hit the panic button for automatic context capture from your IDE!*`;
 }
 
 /* ── Suggestion Chips ── */
@@ -307,18 +307,18 @@ function initQuickActions() {
                     const input = document.getElementById('chatInput');
                     input.focus();
                     input.placeholder = 'Paste your error log here...';
-                    addActivity('📋 Error log paste mode activated');
+                    addActivity('Error log paste mode activated');
                     break;
                 case 'upload-code':
-                    addActivity('📁 File upload initiated');
+                    addActivity('File upload initiated');
                     showToast('File upload feature — attach code files for analysis');
                     break;
                 case 'voice-call':
-                    addActivity('🎙️ Voice call requested');
+                    addActivity('Voice call requested');
                     showToast('Voice call connecting... (demo mode)');
                     break;
                 case 'screen-share':
-                    addActivity('🖥️ Screen share requested');
+                    addActivity('Screen share requested');
                     showToast('Screen sharing initiated... (demo mode)');
                     break;
             }
@@ -360,7 +360,7 @@ function renderIncidents() {
     if (state.incidents.length === 0) {
         list.innerHTML = `
             <div class="empty-state">
-                <span>✅</span>
+            <span>✓</span>
                 <p>No active incidents</p>
             </div>
         `;
@@ -403,12 +403,12 @@ function addActivity(text) {
 
 function startActivitySimulation() {
     const activities = [
-        '🧠 AI model health check — OK',
-        '📚 Knowledge base synced — 1,247 solutions',
-        '🌐 Translation service online',
-        '⚡ Average response time: 4.2s',
-        '📊 Daily: 89 issues resolved',
-        '🔄 System health: optimal',
+        'AI model health check — OK',
+        'Knowledge base synced — 1,247 solutions',
+        'Translation service online',
+        'Average response time: 4.2s',
+        'Daily: 89 issues resolved',
+        'System health: optimal',
     ];
     
     let i = 0;
@@ -587,7 +587,7 @@ async function analyzeDependency(pkg) {
     result.style.display = 'flex';
 
     const scoreColor = data.score >= 75 ? '#ff3b5c' : data.score >= 50 ? '#ffcc00' : '#00e676';
-    const verdict = data.score >= 75 ? '⚠️ Risky' : data.score >= 50 ? '⚡ Caution' : '✅ Safe';
+    const verdict = data.score >= 75 ? 'Risky' : data.score >= 50 ? 'Caution' : 'Safe';
     const circumference = 314;
     const offset = circumference - (data.score / 100) * circumference;
 
@@ -610,35 +610,35 @@ async function analyzeDependency(pkg) {
 
     document.getElementById('depMetrics').innerHTML = `
         <div class="dep-metric ${commitSeverity}">
-            <div class="dep-metric-icon">📅</div>
+            <div class="dep-metric-icon">▣</div>
             <div class="dep-metric-info">
                 <div class="dep-metric-label">Last Commit</div>
                 <div class="dep-metric-value">${data.lastCommit}</div>
             </div>
         </div>
         <div class="dep-metric ${cveSeverity}">
-            <div class="dep-metric-icon">🔐</div>
+            <div class="dep-metric-icon">▧</div>
             <div class="dep-metric-info">
                 <div class="dep-metric-label">Known CVEs</div>
                 <div class="dep-metric-value">${data.cves} vulnerabilit${data.cves !== 1 ? 'ies' : 'y'}</div>
             </div>
         </div>
         <div class="dep-metric ${data.busFactor <= 2 ? 'warning' : 'safe'}">
-            <div class="dep-metric-icon">🚌</div>
+            <div class="dep-metric-icon">○</div>
             <div class="dep-metric-info">
                 <div class="dep-metric-label">Bus Factor</div>
                 <div class="dep-metric-value">${data.busFactor} maintainer${data.busFactor !== 1 ? 's' : ''}</div>
             </div>
         </div>
         <div class="dep-metric safe">
-            <div class="dep-metric-icon">📊</div>
+            <div class="dep-metric-icon">▦</div>
             <div class="dep-metric-info">
                 <div class="dep-metric-label">Weekly Downloads</div>
                 <div class="dep-metric-value">${data.weeklyDownloads}</div>
             </div>
         </div>
         <div class="dep-metric ${abandonSeverity}">
-            <div class="dep-metric-icon">${data.abandoned ? '🪦' : '💚'}</div>
+            <div class="dep-metric-icon">${data.abandoned ? '✗' : '✓'}</div>
             <div class="dep-metric-info">
                 <div class="dep-metric-label">Maintenance Status</div>
                 <div class="dep-metric-value">${data.abandoned ? 'Abandoned / Deprecated' : 'Actively Maintained'}</div>
@@ -646,18 +646,18 @@ async function analyzeDependency(pkg) {
         </div>
         ${data.modern ? `
         <div class="dep-metric safe" style="border-color:var(--p3-color);">
-            <div class="dep-metric-icon">✨</div>
+            <div class="dep-metric-icon">☆</div>
             <div class="dep-metric-info">
                 <div class="dep-metric-label">Modern Alternative</div>
                 <div class="dep-metric-value" style="font-family:var(--font-mono);font-size:0.85rem;">${data.modern}</div>
             </div>
         </div>` : ''}
         <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:0.83rem;color:var(--text-secondary);line-height:1.6;border:1px solid var(--glass-border);">
-            💡 ${data.reason}
+            → ${data.reason}
         </div>
     `;
 
-    addActivity(`📦 Dep analyzed: <strong>${pkg}</strong> — Danger Score ${data.score}/100`);
+    addActivity(`Dep analyzed: <strong>${pkg}</strong> — Danger Score ${data.score}/100`);
 }
 
 /* ── Error Ancestry Tree ── */
@@ -680,7 +680,7 @@ async function buildAncestryTree(stackTrace) {
     const apiResult = await callRescueAPI('ancestry', stackTrace);
     if (apiResult.fromAPI && apiResult.structured && Array.isArray(apiResult.response)) {
         renderAncestryNodes(tree, apiResult.response);
-        addActivity('🌳 Error ancestry traced (Bedrock) — root decision identified');
+        addActivity('Error ancestry traced (Bedrock) — root decision identified');
         return;
     }
 
@@ -739,11 +739,11 @@ async function buildAncestryTree(stackTrace) {
     }
 
     renderAncestryNodes(tree, nodes);
-    addActivity('🌳 Error ancestry traced — root decision identified');
+    addActivity('Error ancestry traced — root decision identified');
 }
 
 function renderAncestryNodes(tree, nodes) {
-    const typeMap = { root: '🔴', cause: '🟠', origin: '🟡', decision: '🔵' };
+    const typeMap = { root: '●', cause: '◐', origin: '○', decision: '◆' };
 
     nodes.forEach((node, i) => {
         if (i > 0) {
@@ -759,9 +759,9 @@ function renderAncestryNodes(tree, nodes) {
         el.innerHTML = `
             <div class="tree-node-card">
                 <div class="tree-node-type">${['Surface Error', 'Propagation Layer', 'Origin Gap', 'Root Decision'][i]}</div>
-                <div class="tree-node-title">${typeMap[node.type] || '🔴'} ${node.label}</div>
+                <div class="tree-node-title">${typeMap[node.type] || '●'} ${node.label}</div>
                 <div class="tree-node-desc">${node.desc}</div>
-                ${node.file ? `<div class="tree-node-file">📍 ${node.file}</div>` : ''}
+                ${node.file ? `<div class="tree-node-file">→ ${node.file}</div>` : ''}
             </div>`;
         tree.appendChild(el);
     });
@@ -774,7 +774,7 @@ function initContextCapsule() {
         const output = document.getElementById('capsuleOutput');
         if (output) {
             navigator.clipboard.writeText(output.innerText).then(() => {
-                showToast('Context Capsule copied to clipboard! 🧬');
+                showToast('Context Capsule copied to clipboard');
             });
         }
     });
@@ -796,7 +796,7 @@ async function generateCapsule() {
     const apiResult = await callRescueAPI('capsule', what, { feature, failed, nextDev });
     if (apiResult.fromAPI && apiResult.response) {
         output.innerHTML = formatMessage(apiResult.response);
-        addActivity(`🧬 Context Capsule generated (Bedrock): <strong>${feature}</strong>`);
+        addActivity(`Context Capsule generated (Bedrock): <strong>${feature}</strong>`);
         return;
     }
 
@@ -804,7 +804,7 @@ async function generateCapsule() {
     const tags = generateCapsuleTags(what + ' ' + failed);
 
     output.innerHTML = `
-        <h4>🧬 CONTEXT CAPSULE</h4>
+        <h4>CONTEXT CAPSULE</h4>
         <div class="capsule-section">
             <strong style="color:var(--text-muted);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Feature / PR</strong><br>
             ${feature}
@@ -812,17 +812,17 @@ async function generateCapsule() {
             <strong style="color:var(--text-muted);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Generated</strong><br>
             ${timestamp}
         </div>
-        <h4>📦 What Was Built</h4>
+        <h4>What Was Built</h4>
         <div class="capsule-section">${what}</div>
-        ${failed ? `<h4>❌ What Was Tried & Failed</h4><div class="capsule-section">${failed}</div>` : ''}
-        ${nextDev ? `<h4>🔑 Next Dev Needs To Know</h4><div class="capsule-section">${nextDev}</div>` : ''}
-        <h4>⚡ AI Insights</h4>
+        ${failed ? `<h4>What Was Tried & Failed</h4><div class="capsule-section">${failed}</div>` : ''}
+        ${nextDev ? `<h4>Next Dev Needs To Know</h4><div class="capsule-section">${nextDev}</div>` : ''}
+        <h4>AI Insights</h4>
         <div class="capsule-section">${generateInsights(what, failed)}</div>
-        <h4>🏷️ Auto-Tags</h4>
+        <h4>Auto-Tags</h4>
         <div class="capsule-section" style="font-family:var(--font-mono);font-size:0.83rem;color:var(--accent-blue);">${tags}</div>
     `;
 
-    addActivity(`🧬 Context Capsule generated: <strong>${feature}</strong>`);
+    addActivity(`Context Capsule generated: <strong>${feature}</strong>`);
 }
 
 function generateCapsuleTags(text) {
@@ -890,9 +890,9 @@ async function generateMentorDebrief(code) {
         if (emptyEl) emptyEl.remove();
         const entry = document.createElement('div');
         entry.className = 'mentor-history-item';
-        entry.innerHTML = `<span>🦉</span><span style="flex:1;">Session at ${formatTime(new Date())} — ${lines} lines, ${Math.min(apiResult.response.length, 4)} insights (Bedrock)</span>`;
+        entry.innerHTML = `<span>○</span><span style="flex:1;">Session at ${formatTime(new Date())} — ${lines} lines, ${Math.min(apiResult.response.length, 4)} insights (Bedrock)</span>`;
         history.insertBefore(entry, history.firstChild);
-        addActivity(`🦉 Mentor debrief done (Bedrock) — ${Math.min(apiResult.response.length, 4)} insights`);
+        addActivity(`Mentor debrief done (Bedrock) — ${Math.min(apiResult.response.length, 4)} insights`);
         return;
     }
 
@@ -905,7 +905,7 @@ async function generateMentorDebrief(code) {
     if (consoleLogs > 0) {
         insights.push({
             type: 'warning',
-            icon: '🪵',
+            icon: '▪',
             title: `${consoleLogs} Console Statement${consoleLogs > 1 ? 's' : ''} Left Behind`,
             text: `You left ${consoleLogs} <code>console.log/error</code> statement${consoleLogs > 1 ? 's' : ''} in your code. Remove these before committing, or replace with a structured logger (winston, pino, loglevel) with severity levels.`,
             code: null,
@@ -916,7 +916,7 @@ async function generateMentorDebrief(code) {
     if ((lower.includes('fetch(') || lower.includes('await ')) && !lower.includes('try') && !lower.includes('.catch')) {
         insights.push({
             type: 'critical',
-            icon: '💥',
+            icon: '⚠',
             title: 'Async Operations Without Error Boundaries',
             text: `Your async calls have no <code>try/catch</code> blocks or <code>.catch()</code> handlers. If the network or operation fails, you'll get an UnhandledPromiseRejection that can crash Node servers or silently break UI.`,
             code: `// Wrap like this:\ntry {\n  const data = await fetchUser(id);\n} catch (err) {\n  console.error('fetchUser failed:', err);\n  return null; // fallback\n}`,
@@ -928,7 +928,7 @@ async function generateMentorDebrief(code) {
     if (todos > 0) {
         insights.push({
             type: 'warning',
-            icon: '📌',
+            icon: '▣',
             title: `${todos} Unresolved TODO/FIXME Marker${todos > 1 ? 's' : ''}`,
             text: `You marked ${todos} piece${todos > 1 ? 's' : ''} of code as needing follow-up. Comments like TODO rarely get revisited — move these to your issue tracker now while context is fresh.`,
             code: null,
@@ -939,7 +939,7 @@ async function generateMentorDebrief(code) {
     if (lower.includes('settimeout') || lower.includes('setinterval')) {
         insights.push({
             type: 'warning',
-            icon: '⏱️',
+            icon: '○',
             title: 'Timer Used — Verify Cleanup on Teardown',
             text: `<code>setTimeout/setInterval</code> detected. Verify these are cleared (clearTimeout/clearInterval) when the component unmounts or module tears down — uncleaned timers are a leading cause of memory leaks in long-running apps.`,
             code: null,
@@ -950,7 +950,7 @@ async function generateMentorDebrief(code) {
     if (lines > 80) {
         insights.push({
             type: 'tip',
-            icon: '📐',
+            icon: '□',
             title: `Large Session — ${lines} Lines Modified`,
             text: `Your session touched ${lines} lines. If you rewrote any logic more than once, that's a signal the abstraction is still evolving. Consider extracting a utility function or custom hook to stabilise the interface.`,
             code: null,
@@ -961,14 +961,14 @@ async function generateMentorDebrief(code) {
     if (insights.length === 0) {
         insights.push({
             type: 'positive',
-            icon: '✅',
+            icon: '✓',
             title: 'Clean, Consistent Session',
             text: `No obvious issues detected. Your code shows consistent naming conventions and readable structure. Consider adding JSDoc comments to public functions — the intent is clearest right now, while the session is fresh.`,
             code: null,
         });
         insights.push({
             type: 'tip',
-            icon: '🧪',
+            icon: '◇',
             title: 'Write Tests While Intent is Fresh',
             text: `You just built something — adding 2–3 edge-case unit tests right now takes 10 minutes and prevents regressions for months. The scenarios you tried (and failed) today are exactly the test cases you need.`,
             code: null,
@@ -978,7 +978,7 @@ async function generateMentorDebrief(code) {
     // Always add reflection observation
     insights.push({
         type: 'tip',
-        icon: '🔍',
+        icon: '→',
         title: 'End-of-Session Reflection',
         text: `Identify the <strong>single decision point</strong> that cost the most time today — that's your highest-ROI area to improve next session. Was it unclear requirements, a missing tool, or an environment issue? Log it.`,
         code: null,
@@ -1005,10 +1005,10 @@ async function generateMentorDebrief(code) {
 
     const entry = document.createElement('div');
     entry.className = 'mentor-history-item';
-    entry.innerHTML = `<span>🦉</span><span style="flex:1;">Session at ${formatTime(new Date())} — ${lines} lines, ${Math.min(insights.length, 3)} insights</span>`;
+    entry.innerHTML = `<span>○</span><span style="flex:1;">Session at ${formatTime(new Date())} — ${lines} lines, ${Math.min(insights.length, 3)} insights</span>`;
     history.insertBefore(entry, history.firstChild);
 
-    addActivity(`🦉 Mentor debrief done — ${Math.min(insights.length, 3)} insights across ${lines} lines`);
+    addActivity(`Mentor debrief done — ${Math.min(insights.length, 3)} insights across ${lines} lines`);
 }
 
 /* ==============================================
@@ -1099,7 +1099,7 @@ async function analyzeCommitRisk(diff) {
     // SQL Injection
     if (lower.includes('+ ') && (lower.includes("req.params") || lower.includes("req.body") || lower.includes("req.query")) && (lower.includes("query(") || lower.includes("exec("))) {
         if (lower.includes("'+") || lower.includes("\" +") || lower.includes('+ req.')) {
-            warnings.push({ severity: 'critical', icon: '💉', title: 'SQL Injection Vulnerability', text: 'String concatenation used in database queries with user input. An attacker can inject arbitrary SQL. Use parameterized queries or ORM methods.', line: 'Detected: string concatenation in db.query()' });
+            warnings.push({ severity: 'critical', icon: '⚠', title: 'SQL Injection Vulnerability', text: 'String concatenation used in database queries with user input. An attacker can inject arbitrary SQL. Use parameterized queries or ORM methods.', line: 'Detected: string concatenation in db.query()' });
             score += 35;
         }
     }
@@ -1107,38 +1107,38 @@ async function analyzeCommitRisk(diff) {
     // Auth bypass
     if ((lower.includes('- ') && lower.includes('if') && (lower.includes('admin') || lower.includes('auth') || lower.includes('permission') || lower.includes('role'))) ||
         (lower.includes('//') && (lower.includes('auth') || lower.includes('check') || lower.includes('permission')) && (lower.includes('removed') || lower.includes('disabled') || lower.includes('todo') || lower.includes('testing')))) {
-        warnings.push({ severity: 'critical', icon: '🔓', title: 'Authentication/Authorization Bypass', text: 'Security check was removed or commented out. Any user can now access protected resources. Never disable auth checks — use feature flags or test-specific middleware instead.', line: 'Detected: security check removed or commented' });
+        warnings.push({ severity: 'critical', icon: '▣', title: 'Authentication/Authorization Bypass', text: 'Security check was removed or commented out. Any user can now access protected resources. Never disable auth checks — use feature flags or test-specific middleware instead.', line: 'Detected: security check removed or commented' });
         score += 30;
     }
 
     // Hardcoded secrets
     if (lower.includes("'secret") || lower.includes('"secret') || (lower.includes('password') && lower.includes("'")) || lower.includes('api_key') || lower.includes('apikey')) {
-        warnings.push({ severity: 'critical', icon: '🔑', title: 'Hardcoded Secret/Credential', text: 'Credentials or API keys are hardcoded in source code. These will be visible in version control. Use environment variables or a secrets manager (AWS Secrets Manager, Vault).', line: 'Detected: secret/password in source' });
+        warnings.push({ severity: 'critical', icon: '◇', title: 'Hardcoded Secret/Credential', text: 'Credentials or API keys are hardcoded in source code. These will be visible in version control. Use environment variables or a secrets manager (AWS Secrets Manager, Vault).', line: 'Detected: secret/password in source' });
         score += 25;
     }
 
     // Debug endpoints
     if (lower.includes('debug') && (lower.includes('/api') || lower.includes('app.get') || lower.includes('app.post'))) {
-        warnings.push({ severity: 'high', icon: '🐛', title: 'Debug Endpoint Left in Code', text: 'A debug/diagnostic endpoint is being added. If this reaches production, it could expose internal data or allow unauthorized actions. Gate behind NODE_ENV check at minimum.', line: 'Detected: debug route exposed' });
+        warnings.push({ severity: 'high', icon: '▪', title: 'Debug Endpoint Left in Code', text: 'A debug/diagnostic endpoint is being added. If this reaches production, it could expose internal data or allow unauthorized actions. Gate behind NODE_ENV check at minimum.', line: 'Detected: debug route exposed' });
         score += 15;
     }
 
     // Commented-out code
     const commentedLines = (diff.match(/^\+\s*\/\//gm) || []).length;
     if (commentedLines >= 2) {
-        warnings.push({ severity: 'medium', icon: '💬', title: `${commentedLines} Lines of Commented-Out Code`, text: 'Commented-out code clutters the codebase and creates confusion about what\'s active. If the code is being removed, delete it — git history preserves it. If it\'s temporary, track it in an issue.', line: `${commentedLines} commented lines detected` });
+        warnings.push({ severity: 'medium', icon: '—', title: `${commentedLines} Lines of Commented-Out Code`, text: 'Commented-out code clutters the codebase and creates confusion about what\'s active. If the code is being removed, delete it — git history preserves it. If it\'s temporary, track it in an issue.', line: `${commentedLines} commented lines detected` });
         score += 8;
     }
 
     // Performance: removed caching
     if (lower.includes('- ') && (lower.includes('cache') || lower.includes('lru') || lower.includes('redis') || lower.includes('memo'))) {
-        warnings.push({ severity: 'high', icon: '🐌', title: 'Caching Layer Removed', text: 'A cache or memoization layer was removed. This can cause N+1 queries or repeated expensive computations under high traffic. Verify that the cache was actually unused before removing.', line: 'Detected: cache/memoization removed' });
+        warnings.push({ severity: 'high', icon: '○', title: 'Caching Layer Removed', text: 'A cache or memoization layer was removed. This can cause N+1 queries or repeated expensive computations under high traffic. Verify that the cache was actually unused before removing.', line: 'Detected: cache/memoization removed' });
         score += 18;
     }
 
     // SELECT *
     if (lower.includes('select *') && (lower.includes('transactions') || lower.includes('users') || lower.includes('orders') || lower.includes('logs'))) {
-        warnings.push({ severity: 'high', icon: '📊', title: 'Unbounded SELECT * on Large Table', text: 'A SELECT * without LIMIT on what could be a high-volume table. In production this can return millions of rows, causing OOM crashes and network saturation. Add pagination (LIMIT/OFFSET) and select only needed columns.', line: 'Detected: SELECT * without LIMIT' });
+        warnings.push({ severity: 'high', icon: '▦', title: 'Unbounded SELECT * on Large Table', text: 'A SELECT * without LIMIT on what could be a high-volume table. In production this can return millions of rows, causing OOM crashes and network saturation. Add pagination (LIMIT/OFFSET) and select only needed columns.', line: 'Detected: SELECT * without LIMIT' });
         score += 15;
     }
 
@@ -1146,40 +1146,40 @@ async function analyzeCommitRisk(diff) {
     if (lower.includes('batch_size') || lower.includes('batchsize')) {
         const numMatch = diff.match(/\+.*?(\d{4,})/);
         if (numMatch) {
-            warnings.push({ severity: 'medium', icon: '📦', title: 'Batch Size Increased Significantly', text: `Batch size was increased to ${numMatch[1]}. Large batches can cause memory spikes, database timeouts, and slow rollbacks. Load-test with production-scale data before merging.`, line: `New batch size: ${numMatch[1]}` });
+            warnings.push({ severity: 'medium', icon: '□', title: 'Batch Size Increased Significantly', text: `Batch size was increased to ${numMatch[1]}. Large batches can cause memory spikes, database timeouts, and slow rollbacks. Load-test with production-scale data before merging.`, line: `New batch size: ${numMatch[1]}` });
             score += 10;
         }
     }
 
     // Sequential awaits (perf)
     if (lower.includes('for (') && lower.includes('await ') && !lower.includes('promise.all')) {
-        warnings.push({ severity: 'medium', icon: '🔄', title: 'Sequential Awaits in Loop', text: 'Awaiting inside a loop runs operations one-at-a-time. If operations are independent, use Promise.all() with batching for parallel execution — can be 10-50x faster.', line: 'Detected: await inside for loop' });
+        warnings.push({ severity: 'medium', icon: '↻', title: 'Sequential Awaits in Loop', text: 'Awaiting inside a loop runs operations one-at-a-time. If operations are independent, use Promise.all() with batching for parallel execution — can be 10-50x faster.', line: 'Detected: await inside for loop' });
         score += 10;
     }
 
     // Token expiry too long
     const expiryMatch = diff.match(/expiresIn:\s*['"](\d+)d['"]/);
     if (expiryMatch && parseInt(expiryMatch[1]) > 7) {
-        warnings.push({ severity: 'medium', icon: '⏰', title: `Token Expiry: ${expiryMatch[1]} Days`, text: `JWT tokens set to expire in ${expiryMatch[1]} days. If a token is compromised, the attacker has a long window. Use short-lived access tokens (15min-1hr) with refresh token rotation.`, line: `expiresIn: ${expiryMatch[1]}d` });
+        warnings.push({ severity: 'medium', icon: '○', title: `Token Expiry: ${expiryMatch[1]} Days`, text: `JWT tokens set to expire in ${expiryMatch[1]} days. If a token is compromised, the attacker has a long window. Use short-lived access tokens (15min-1hr) with refresh token rotation.`, line: `expiresIn: ${expiryMatch[1]}d` });
         score += 12;
     }
 
     // DELETE without WHERE
     if (lower.includes('delete from') && !lower.includes('where')) {
-        warnings.push({ severity: 'critical', icon: '🗑️', title: 'DELETE Without WHERE Clause', text: 'This query will delete ALL rows in the table. If this reaches production, you lose all data in that table. Always include a WHERE clause and test with LIMIT first.', line: 'Detected: DELETE FROM without WHERE' });
+        warnings.push({ severity: 'critical', icon: '✗', title: 'DELETE Without WHERE Clause', text: 'This query will delete ALL rows in the table. If this reaches production, you lose all data in that table. Always include a WHERE clause and test with LIMIT first.', line: 'Detected: DELETE FROM without WHERE' });
         score += 30;
     }
 
     // No warnings = clean diff
     if (warnings.length === 0) {
-        warnings.push({ severity: 'low', icon: '✅', title: 'No Major Issues Detected', text: 'This diff looks clean. No obvious security, performance, or reliability issues found. Standard code review still recommended — automated analysis only catches known patterns.', line: null });
+        warnings.push({ severity: 'low', icon: '✓', title: 'No Major Issues Detected', text: 'This diff looks clean. No obvious security, performance, or reliability issues found. Standard code review still recommended — automated analysis only catches known patterns.', line: null });
     }
 
     score = Math.min(score, 98);
 
     // Render score
     const scoreColor = score >= 75 ? '#ff3b5c' : score >= 50 ? '#ff9100' : score >= 25 ? '#ffcc00' : '#00e676';
-    const verdict = score >= 75 ? '🚫 DO NOT MERGE' : score >= 50 ? '⚠️ HIGH RISK' : score >= 25 ? '⚡ CAUTION' : '✅ SAFE TO MERGE';
+    const verdict = score >= 75 ? 'DO NOT MERGE' : score >= 50 ? 'HIGH RISK' : score >= 25 ? 'CAUTION' : 'SAFE TO MERGE';
     const verdictBg = score >= 75 ? 'rgba(255,59,92,0.15)' : score >= 50 ? 'rgba(255,145,0,0.15)' : score >= 25 ? 'rgba(255,204,0,0.12)' : 'rgba(0,230,118,0.12)';
 
     document.getElementById('commitriskScoreNum').textContent = score;
@@ -1206,7 +1206,7 @@ async function analyzeCommitRisk(diff) {
             <div class="cr-warning-body">
                 <div class="cr-warning-title">${w.title}</div>
                 <div class="cr-warning-text">${w.text}</div>
-                ${w.line ? `<div class="cr-warning-line">📍 ${w.line}</div>` : ''}
+                ${w.line ? `<div class="cr-warning-line">→ ${w.line}</div>` : ''}
             </div>`;
         warningsEl.appendChild(el);
     });
@@ -1215,21 +1215,21 @@ async function analyzeCommitRisk(diff) {
     const critCount = warnings.filter(w => w.severity === 'critical').length;
     const highCount = warnings.filter(w => w.severity === 'high').length;
     document.getElementById('commitriskSummary').innerHTML = `
-        <strong>📊 Risk Summary:</strong> ${warnings.length} issue${warnings.length !== 1 ? 's' : ''} found
+        <strong>Risk Summary:</strong> ${warnings.length} issue${warnings.length !== 1 ? 's' : ''} found
         ${critCount ? ` · <span style="color:var(--p0-color)">${critCount} critical</span>` : ''}
         ${highCount ? ` · <span style="color:var(--p1-color)">${highCount} high</span>` : ''}
         <br><br>
-        <strong>💡 Recommendation:</strong> ${score >= 50 ? 'This commit needs security review before merging. Address critical issues first, then re-run analysis.' : 'Low risk. Proceed with standard code review processes.'}
+        <strong>Recommendation:</strong> ${score >= 50 ? 'This commit needs security review before merging. Address critical issues first, then re-run analysis.' : 'Low risk. Proceed with standard code review processes.'}
     `;
 
-    addActivity(`⚡ Commit risk analyzed — Score: ${score}/100 (${warnings.length} issues)`);
+    addActivity(`Commit risk analyzed — Score: ${score}/100 (${warnings.length} issues)`);
 }
 
 function renderCommitRiskResult(data) {
     const score = Math.min(data.score, 98);
     const warnings = data.warnings || [];
     const scoreColor = score >= 75 ? '#ff3b5c' : score >= 50 ? '#ff9100' : score >= 25 ? '#ffcc00' : '#00e676';
-    const verdict = data.verdict || (score >= 75 ? '🚫 DO NOT MERGE' : score >= 50 ? '⚠️ HIGH RISK' : score >= 25 ? '⚡ CAUTION' : '✅ SAFE TO MERGE');
+    const verdict = data.verdict || (score >= 75 ? 'DO NOT MERGE' : score >= 50 ? 'HIGH RISK' : score >= 25 ? 'CAUTION' : 'SAFE TO MERGE');
     const verdictBg = score >= 75 ? 'rgba(255,59,92,0.15)' : score >= 50 ? 'rgba(255,145,0,0.15)' : score >= 25 ? 'rgba(255,204,0,0.12)' : 'rgba(0,230,118,0.12)';
 
     document.getElementById('commitriskScoreNum').textContent = score;
@@ -1256,13 +1256,13 @@ function renderCommitRiskResult(data) {
             <div class="cr-warning-body">
                 <div class="cr-warning-title">${w.title}</div>
                 <div class="cr-warning-text">${w.text}</div>
-                ${w.line ? `<div class="cr-warning-line">📍 ${w.line}</div>` : ''}
+                ${w.line ? `<div class="cr-warning-line">→ ${w.line}</div>` : ''}
             </div>`;
         warningsEl.appendChild(el);
     });
 
-    document.getElementById('commitriskSummary').innerHTML = data.summary || `<strong>📊 Risk Summary:</strong> ${warnings.length} issue(s) found. Score: ${score}/100.`;
-    addActivity(`⚡ Commit risk analyzed (Bedrock) — Score: ${score}/100`);
+    document.getElementById('commitriskSummary').innerHTML = data.summary || `<strong>Risk Summary:</strong> ${warnings.length} issue(s) found. Score: ${score}/100.`;
+    addActivity(`Commit risk analyzed (Bedrock) — Score: ${score}/100`);
 }
 
 /* ==============================================
@@ -1275,7 +1275,7 @@ function initPostMortem() {
         const output = document.getElementById('pmOutput');
         if (output) {
             navigator.clipboard.writeText(output.innerText).then(() => {
-                showToast('Post-Mortem copied to clipboard! 📋');
+                showToast('Post-Mortem copied to clipboard');
             });
         }
     });
@@ -1301,7 +1301,7 @@ async function generatePostMortem() {
     const apiResult = await callRescueAPI('postmortem', whatBroke, { when, duration, rootCause: rootCause, fix, impact });
     if (apiResult.fromAPI && apiResult.response) {
         output.innerHTML = formatMessage(apiResult.response);
-        addActivity(`📋 Post-Mortem generated (Bedrock): ${whatBroke.substring(0, 40)}`);
+        addActivity(`Post-Mortem generated (Bedrock): ${whatBroke.substring(0, 40)}`);
         return;
     }
 
@@ -1314,27 +1314,27 @@ async function generatePostMortem() {
     const lessons = generateLessons(rootCause, whatBroke);
 
     output.innerHTML = `
-        <h3>📋 INCIDENT POST-MORTEM</h3>
+        <h3>INCIDENT POST-MORTEM</h3>
         <div style="text-align:center;">
             <div class="pm-severity-badge" style="color:${sevColor};background:${sevBg};">${severity} — ${whatBroke.substring(0, 60)}</div>
         </div>
 
         <div class="pm-section">
-            <div class="pm-section-title">📌 Executive Summary</div>
+            <div class="pm-section-title">Executive Summary</div>
             <div class="pm-section-content">
                 On <strong>${when}</strong>, an incident occurred affecting ${impact}. The outage lasted approximately <strong>${duration}</strong>. Root cause was identified as: ${rootCause.substring(0, 200)}. ${fix ? 'The issue was resolved by: ' + fix.substring(0, 150) + '.' : 'Mitigation is in progress.'}
             </div>
         </div>
 
         <div class="pm-section">
-            <div class="pm-section-title">🕐 Timeline</div>
+            <div class="pm-section-title">Timeline</div>
             <div class="pm-section-content">
                 ${timeline}
             </div>
         </div>
 
         <div class="pm-section">
-            <div class="pm-section-title">🔍 Root Cause Analysis</div>
+            <div class="pm-section-title">Root Cause Analysis</div>
             <div class="pm-section-content">
                 <strong>Primary cause:</strong> ${rootCause}<br><br>
                 <strong>Contributing factors:</strong><br>
@@ -1343,14 +1343,14 @@ async function generatePostMortem() {
         </div>
 
         <div class="pm-section">
-            <div class="pm-section-title">💊 Resolution</div>
+            <div class="pm-section-title">Resolution</div>
             <div class="pm-section-content">
                 ${fix || 'Resolution details pending. Update this section once the fix is fully deployed and verified.'}
             </div>
         </div>
 
         <div class="pm-section">
-            <div class="pm-section-title">💥 Impact</div>
+            <div class="pm-section-title">Impact</div>
             <div class="pm-section-content">
                 <strong>Users affected:</strong> ${impact}<br>
                 <strong>Duration:</strong> ${duration}<br>
@@ -1359,14 +1359,14 @@ async function generatePostMortem() {
         </div>
 
         <div class="pm-section">
-            <div class="pm-section-title">✅ Action Items</div>
+            <div class="pm-section-title">Action Items</div>
             <div class="pm-section-content">
                 ${actionItems}
             </div>
         </div>
 
         <div class="pm-section">
-            <div class="pm-section-title">📚 Lessons Learned</div>
+            <div class="pm-section-title">Lessons Learned</div>
             <div class="pm-section-content">
                 ${lessons}
             </div>
@@ -1377,7 +1377,7 @@ async function generatePostMortem() {
         </div>
     `;
 
-    addActivity(`📋 Post-Mortem generated: ${severity} — ${whatBroke.substring(0, 40)}`);
+    addActivity(`Post-Mortem generated: ${severity} — ${whatBroke.substring(0, 40)}`);
 }
 
 function determinePMSeverity(whatBroke, impact) {
@@ -1462,7 +1462,7 @@ function downloadPostMortem() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Post-Mortem downloaded as .md file! 📄');
+    showToast('Post-Mortem downloaded as .md file');
 }
 
 /* ==============================================
@@ -1565,7 +1565,7 @@ async function startDuckSession(problem) {
     messages.innerHTML = '';
 
     // Show duck intro
-    addDuckMessage('duck', `🦆 Thanks for sharing. I've read your problem — now I'm going to ask you 4 questions. I won't give you the answer. Instead, **think through each one carefully** before replying. Most developers find their own answer by question 3.`);
+    addDuckMessage('duck', `Thanks for sharing. I've read your problem — now I'm going to ask you 4 questions. I won't give you the answer. Instead, **think through each one carefully** before replying. Most developers find their own answer by question 3.`);
 
     // Show user's problem
     addDuckMessage('user', problem);
@@ -1576,7 +1576,7 @@ async function startDuckSession(problem) {
     }, 600);
 
     updateDuckProgress();
-    addActivity('🦆 Rubber Duck session started');
+    addActivity('Rubber Duck session started');
 }
 
 function askDuckQuestion() {
@@ -1601,7 +1601,7 @@ function duckReply() {
     // Show insight for previous question
     const q = duckState.questions[duckState.step];
     setTimeout(() => {
-        addDuckMessage('duck', `💡 *Insight:* ${q.insight}`);
+        addDuckMessage('duck', `*Insight:* ${q.insight}`);
 
         duckState.step++;
         updateDuckProgress();
@@ -1619,7 +1619,7 @@ function addDuckMessage(type, text) {
     const msg = document.createElement('div');
     msg.className = `duck-msg ${type}`;
     msg.innerHTML = `
-        <div class="duck-msg-header">${type === 'duck' ? '🦆 Rubber Duck' : '👤 You'}</div>
+        <div class="duck-msg-header">${type === 'duck' ? 'Rubber Duck' : 'You'}</div>
         <div class="duck-msg-text">${formatMessage(text)}</div>
     `;
     messages.appendChild(msg);
@@ -1646,7 +1646,7 @@ function completeDuckSession() {
 
     document.getElementById('duckCompleteSummary').innerHTML = `You answered all 4 questions about: "<em>${duckState.problem.substring(0, 80)}...</em>"<br><br>If you found your answer — great, that's the power of structured thinking. If not, take these insights to the <strong>Emergency Chat</strong> tab and let AI help with the specific blocker you've identified.`;
 
-    addActivity('🦆 Rubber Duck session complete — 4/4 questions answered');
+    addActivity('Rubber Duck session complete — 4/4 questions answered');
 }
 
 function resetDuckSession() {
@@ -1662,13 +1662,13 @@ function resetDuckSession() {
    GLOBAL UI HANDLERS
    ============================================== */
 
-/* ── Chat Header Action Buttons (📞📹🖥️) + Attach ── */
+/* -- Chat Header Action Buttons + Attach -- */
 function initChatHeaderActions() {
     document.querySelectorAll('.chat-action-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const title = btn.getAttribute('title') || 'Action';
             showToast(`${title} connecting... (demo mode)`);
-            addActivity(`📡 ${title} requested`);
+            addActivity(`${title} requested`);
         });
     });
 
@@ -1676,7 +1676,7 @@ function initChatHeaderActions() {
     if (attachBtn) {
         attachBtn.addEventListener('click', () => {
             showToast('File attachment — drag & drop or paste code directly into the chat');
-            addActivity('📎 File attach triggered');
+            addActivity('File attach triggered');
         });
     }
 }
@@ -1711,6 +1711,6 @@ function initLanguageSelector() {
     select.addEventListener('change', () => {
         const lang = select.options[select.selectedIndex].text;
         showToast(`Language switched to ${lang} (demo mode)`);
-        addActivity(`🌐 Language changed: ${lang}`);
+        addActivity(`Language changed: ${lang}`);
     });
 }

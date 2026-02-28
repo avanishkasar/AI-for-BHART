@@ -18,19 +18,19 @@
     <nav class="dash-nav">
         <div class="dash-nav-inner">
             <a href="index.html" class="nav-logo">
-                <span class="logo-icon">🚨</span>
+                <span class="logo-icon">●</span>
                 <span class="logo-text">CodeRescue<span class="logo-ai">AI</span></span>
             </a>
             <!-- Feature Tabs Nav -->
             <div class="dash-tabs">
-                <button class="dash-tab active" data-tab="chat">🚨 Emergency Chat</button>
-                <button class="dash-tab" data-tab="dependency">📦 Dep Danger</button>
-                <button class="dash-tab" data-tab="ancestry">🌳 Error Ancestry</button>
-                <button class="dash-tab" data-tab="capsule">🧬 Context Capsule</button>
-                <button class="dash-tab" data-tab="mentor">🦉 Quiet Mentor</button>
-                <button class="dash-tab" data-tab="commitrisk">⚡ Commit Risk</button>
-                <button class="dash-tab" data-tab="postmortem">📋 Post-Mortem</button>
-                <button class="dash-tab" data-tab="rubberduck">🦆 Rubber Duck</button>
+                <button class="dash-tab active" data-tab="chat">Emergency Chat</button>
+                <button class="dash-tab" data-tab="dependency">Dep Danger</button>
+                <button class="dash-tab" data-tab="ancestry">Error Ancestry</button>
+                <button class="dash-tab" data-tab="capsule">Context Capsule</button>
+                <button class="dash-tab" data-tab="mentor">Quiet Mentor</button>
+                <button class="dash-tab" data-tab="commitrisk">Commit Risk</button>
+                <button class="dash-tab" data-tab="postmortem">Post-Mortem</button>
+                <button class="dash-tab" data-tab="rubberduck">Rubber Duck</button>
             </div>
             <div class="dash-nav-right">
                 <div class="nav-stat-mini">
@@ -55,25 +55,25 @@
             <div class="panic-card glass-card">
                 <div class="panic-bg-pulse"></div>
                 <h3>Emergency Assistance</h3>
-                <p>Stuck on a bug? Hit the panic button for instant AI help.</p>
+                <p>Stuck on a bug? Get instant AI-powered help.</p>
                 <button class="panic-button" id="panicButton">
                     <span class="panic-ring ring-1"></span>
                     <span class="panic-ring ring-2"></span>
                     <span class="panic-ring ring-3"></span>
                     <span class="panic-inner">
-                        <span class="panic-icon">🚨</span>
-                        <span class="panic-text">PANIC</span>
+                        <span class="panic-icon">!</span>
+                        <span class="panic-text">SOS</span>
                     </span>
                 </button>
-                <p class="panic-hint">Press to activate emergency support</p>
+                <p class="panic-hint">Press for emergency support</p>
             </div>
 
             <div class="quick-actions glass-card">
                 <h4>Quick Actions</h4>
-                <button class="quick-btn" data-action="paste-error"><span>📋</span> Paste Error Log</button>
-                <button class="quick-btn" data-action="upload-code"><span>📁</span> Upload Code File</button>
-                <button class="quick-btn" data-action="voice-call"><span>🎙️</span> Start Voice Call</button>
-                <button class="quick-btn" data-action="screen-share"><span>🖥️</span> Screen Share</button>
+                <button class="quick-btn" data-action="paste-error"><span>→</span> Paste Error Log</button>
+                <button class="quick-btn" data-action="upload-code"><span>→</span> Upload Code File</button>
+                <button class="quick-btn" data-action="voice-call"><span>→</span> Start Voice Call</button>
+                <button class="quick-btn" data-action="screen-share"><span>→</span> Screen Share</button>
             </div>
 
             <div class="incidents-card glass-card">
@@ -82,7 +82,7 @@
                     <span class="incident-count" id="incidentBadge">0</span>
                 </div>
                 <div class="incidents-list" id="incidentsList">
-                    <div class="empty-state"><span>✅</span><p>No active incidents</p></div>
+                    <div class="empty-state"><span>✓</span><p>No active incidents</p></div>
                 </div>
             </div>
         </aside>
@@ -94,14 +94,14 @@
             <div class="triage-overlay" id="triageOverlay">
                 <div class="triage-modal glass-card">
                     <div class="triage-header">
-                        <h3>🔍 AI Triage in Progress</h3>
+                        <h3>AI Triage in Progress</h3>
                         <div class="triage-progress"><div class="triage-progress-bar" id="triageProgressBar"></div></div>
                     </div>
                     <div class="triage-steps" id="triageSteps">
-                        <div class="triage-step" data-step="1"><span class="triage-step-icon">📸</span><span class="triage-step-text">Capturing context...</span><span class="triage-step-status">⏳</span></div>
-                        <div class="triage-step" data-step="2"><span class="triage-step-icon">🧠</span><span class="triage-step-text">Analyzing code patterns...</span><span class="triage-step-status">⏳</span></div>
-                        <div class="triage-step" data-step="3"><span class="triage-step-icon">🏷️</span><span class="triage-step-text">Classifying severity...</span><span class="triage-step-status">⏳</span></div>
-                        <div class="triage-step" data-step="4"><span class="triage-step-icon">🔀</span><span class="triage-step-text">Routing to best resource...</span><span class="triage-step-status">⏳</span></div>
+                        <div class="triage-step" data-step="1"><span class="triage-step-icon">1</span><span class="triage-step-text">Capturing context...</span><span class="triage-step-status">·</span></div>
+                        <div class="triage-step" data-step="2"><span class="triage-step-icon">2</span><span class="triage-step-text">Analyzing code patterns...</span><span class="triage-step-status">·</span></div>
+                        <div class="triage-step" data-step="3"><span class="triage-step-icon">3</span><span class="triage-step-text">Classifying severity...</span><span class="triage-step-status">·</span></div>
+                        <div class="triage-step" data-step="4"><span class="triage-step-icon">4</span><span class="triage-step-text">Routing to best resource...</span><span class="triage-step-status">·</span></div>
                     </div>
                     <div class="triage-result" id="triageResult" style="display:none;">
                         <div class="triage-severity" id="triageSeverity"></div>
@@ -116,21 +116,21 @@
                 <div class="chat-container glass-card">
                     <div class="chat-header">
                         <div class="chat-header-left">
-                            <div class="ai-avatar-small"><span>🤖</span></div>
+                            <div class="ai-avatar-small"><span>AI</span></div>
                             <div>
                                 <h4>CodeRescue AI Assistant</h4>
                                 <span class="chat-status"><span class="status-dot online"></span> Online — Ready to help</span>
                             </div>
                         </div>
                         <div class="chat-header-actions">
-                            <button class="chat-action-btn" title="Voice Call"><span>📞</span></button>
-                            <button class="chat-action-btn" title="Video Call"><span>📹</span></button>
-                            <button class="chat-action-btn" title="Screen Share"><span>🖥️</span></button>
+                            <button class="chat-action-btn" title="Voice Call"><span>☎</span></button>
+                            <button class="chat-action-btn" title="Video Call"><span>◎</span></button>
+                            <button class="chat-action-btn" title="Screen Share"><span>□</span></button>
                         </div>
                     </div>
                     <div class="chat-messages" id="chatMessages">
                         <div class="chat-welcome">
-                            <div class="welcome-icon">🚨</div>
+                            <div class="welcome-icon">•</div>
                             <h3>Welcome to CodeRescue AI</h3>
                             <p>Describe your issue or hit the panic button to get started.</p>
                             <div class="welcome-suggestions">
@@ -143,7 +143,7 @@
                     </div>
                     <div class="chat-input-area">
                         <div class="chat-input-wrapper glass-card-inner">
-                            <button class="attach-btn" title="Attach file">📎</button>
+                            <button class="attach-btn" title="Attach file">+</button>
                             <textarea class="chat-input" id="chatInput" placeholder="Describe your issue or paste an error..." rows="1"></textarea>
                             <button class="send-btn" id="sendBtn" title="Send">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
@@ -158,7 +158,7 @@
             <div class="tab-panel" id="tab-dependency">
                 <div class="feature-panel glass-card">
                     <div class="feature-panel-header">
-                        <div class="feature-panel-icon">📦</div>
+                        <div class="feature-panel-icon">■</div>
                         <div>
                             <h2>Dependency Danger Score</h2>
                             <p>Before you <code>npm install</code> anything — know exactly what you're getting into.</p>
@@ -167,7 +167,7 @@
                     <div class="dep-input-row">
                         <input type="text" id="depInput" class="feature-input" placeholder="Enter package name (e.g. moment, lodash, left-pad)...">
                         <button class="btn btn-primary" id="depAnalyzeBtn">
-                            <span>🔍</span> Analyze
+                            <span>→</span> Analyze
                         </button>
                     </div>
                     <div class="dep-result" id="depResult" style="display:none;">
@@ -206,7 +206,7 @@
             <div class="tab-panel" id="tab-ancestry">
                 <div class="feature-panel glass-card">
                     <div class="feature-panel-header">
-                        <div class="feature-panel-icon">🌳</div>
+                        <div class="feature-panel-icon">△</div>
                         <div>
                             <h2>Error Ancestry Tree</h2>
                             <p>Don't just fix the symptom. Find the original decision that made this error <em>inevitable</em>.</p>
@@ -218,7 +218,7 @@ Example:
 TypeError: Cannot read properties of undefined (reading 'map')
     at UserList (UserList.jsx:23)
     at renderWithHooks (react-dom.js:14985)"></textarea>
-                        <button class="btn btn-primary" id="ancestryAnalyzeBtn"><span>🌳</span> Trace Ancestry</button>
+                        <button class="btn btn-primary" id="ancestryAnalyzeBtn"><span>→</span> Trace Ancestry</button>
                     </div>
                     <div class="ancestry-result" id="ancestryResult" style="display:none;">
                         <div class="ancestry-tree" id="ancestryTree"></div>
@@ -230,7 +230,7 @@ TypeError: Cannot read properties of undefined (reading 'map')
             <div class="tab-panel" id="tab-capsule">
                 <div class="feature-panel glass-card">
                     <div class="feature-panel-header">
-                        <div class="feature-panel-icon">🧬</div>
+                        <div class="feature-panel-icon">◇</div>
                         <div>
                             <h2>Context Capsule</h2>
                             <p>Wrap up a feature session. AI auto-generates a handoff doc so the next dev never starts blind.</p>
@@ -253,11 +253,11 @@ TypeError: Cannot read properties of undefined (reading 'map')
                             <label>What should the next dev know?</label>
                             <textarea id="capsuleNextDev" class="feature-input feature-textarea-sm" placeholder="e.g. The token expiry is hardcoded in config.js line 47, needs env variable..."></textarea>
                         </div>
-                        <button class="btn btn-primary" id="capsuleGenerateBtn"><span>🧬</span> Generate Capsule</button>
+                        <button class="btn btn-primary" id="capsuleGenerateBtn"><span>→</span> Generate Capsule</button>
                     </div>
                     <div class="capsule-result" id="capsuleResult" style="display:none;">
                         <div class="capsule-output glass-card-inner" id="capsuleOutput"></div>
-                        <button class="btn btn-outline" id="capsuleCopyBtn">📋 Copy Capsule</button>
+                        <button class="btn btn-outline" id="capsuleCopyBtn">Copy Capsule</button>
                     </div>
                 </div>
             </div>
@@ -266,7 +266,7 @@ TypeError: Cannot read properties of undefined (reading 'map')
             <div class="tab-panel" id="tab-mentor">
                 <div class="feature-panel glass-card">
                     <div class="feature-panel-header">
-                        <div class="feature-panel-icon">🦉</div>
+                        <div class="feature-panel-icon">○</div>
                         <div>
                             <h2>The Quiet Mentor</h2>
                             <p>Paste your session's code diff. AI reviews your session like a coach watching game tape — never interrupts, only debrief after.</p>
@@ -284,13 +284,13 @@ function processOrders(orders) {
     db.save(o)
   })
 }"></textarea>
-                        <button class="btn btn-primary" id="mentorAnalyzeBtn"><span>🦉</span> Get Debrief</button>
+                        <button class="btn btn-primary" id="mentorAnalyzeBtn"><span>→</span> Get Debrief</button>
                     </div>
                     <div class="mentor-result" id="mentorResult" style="display:none;">
                         <div class="mentor-debrief" id="mentorDebrief"></div>
                     </div>
                     <div class="mentor-sessions glass-card-inner">
-                        <h4>📅 Past Debriefs</h4>
+                        <h4>Past Debriefs</h4>
                         <div id="mentorHistory">
                             <div class="empty-state-small">No debriefs yet. Paste your first session above.</div>
                         </div>
@@ -302,7 +302,7 @@ function processOrders(orders) {
             <div class="tab-panel" id="tab-commitrisk">
                 <div class="feature-panel glass-card">
                     <div class="feature-panel-header">
-                        <div class="feature-panel-icon">⚡</div>
+                        <div class="feature-panel-icon">⚠</div>
                         <div>
                             <h2>Commit Risk Predictor</h2>
                             <p>Paste a diff before you push. AI scores the risk of this commit breaking production — with specific line-level warnings.</p>
@@ -323,7 +323,7 @@ Example:
     return res.json(secrets);
 - }"></textarea>
                         <div class="commitrisk-actions">
-                            <button class="btn btn-primary" id="commitriskAnalyzeBtn"><span>⚡</span> Predict Risk</button>
+                            <button class="btn btn-primary" id="commitriskAnalyzeBtn"><span>→</span> Predict Risk</button>
                             <div class="commitrisk-chips">
                                 <button class="suggestion-chip cr-demo-chip" data-demo="sql-injection">SQL Injection</button>
                                 <button class="suggestion-chip cr-demo-chip" data-demo="auth-bypass">Auth Bypass</button>
@@ -355,7 +355,7 @@ Example:
             <div class="tab-panel" id="tab-postmortem">
                 <div class="feature-panel glass-card">
                     <div class="feature-panel-header">
-                        <div class="feature-panel-icon">📋</div>
+                        <div class="feature-panel-icon">≡</div>
                         <div>
                             <h2>Incident Post-Mortem Generator</h2>
                             <p>What took your team 3 hours to write now takes 30 seconds. Describe the incident — AI generates a professional post-mortem document.</p>
@@ -385,13 +385,13 @@ Example:
                             <label>Impact (who was affected?)</label>
                             <input type="text" id="pmImpact" class="feature-input" placeholder="e.g. ~12,000 users, $45K revenue impact, 3 SLA breaches">
                         </div>
-                        <button class="btn btn-primary" id="pmGenerateBtn"><span>📋</span> Generate Post-Mortem</button>
+                        <button class="btn btn-primary" id="pmGenerateBtn"><span>→</span> Generate Post-Mortem</button>
                     </div>
                     <div class="postmortem-result" id="pmResult" style="display:none;">
                         <div class="postmortem-output glass-card-inner" id="pmOutput"></div>
                         <div class="pm-actions">
-                            <button class="btn btn-outline" id="pmCopyBtn">📋 Copy Document</button>
-                            <button class="btn btn-outline" id="pmDownloadBtn">💾 Download .md</button>
+                            <button class="btn btn-outline" id="pmCopyBtn">Copy Document</button>
+                            <button class="btn btn-outline" id="pmDownloadBtn">Download .md</button>
                         </div>
                     </div>
                 </div>
@@ -401,7 +401,7 @@ Example:
             <div class="tab-panel" id="tab-rubberduck">
                 <div class="feature-panel glass-card">
                     <div class="feature-panel-header">
-                        <div class="feature-panel-icon">🦆</div>
+                        <div class="feature-panel-icon">❧</div>
                         <div>
                             <h2>Rubber Duck Mode</h2>
                             <p>Stuck but don't know why? AI won't give you the answer — it asks you 4 guided questions to help you find it yourself. Learning by thinking, not copying.</p>
@@ -409,14 +409,14 @@ Example:
                     </div>
                     <div class="duck-session" id="duckSession">
                         <div class="duck-start" id="duckStart">
-                            <div class="duck-icon-big">🦆</div>
+                            <div class="duck-icon-big">❧</div>
                             <h3>Ready to think out loud?</h3>
                             <p>Describe your problem and I'll guide you through 4 focused questions. No answers — just the right prompts to unlock your own solution.</p>
                             <div class="capsule-field" style="width:100%;">
                                 <label>What are you stuck on?</label>
                                 <textarea id="duckProblem" class="feature-input feature-textarea-sm" placeholder="e.g. My React component re-renders infinitely when I add a useEffect that calls an API..."></textarea>
                             </div>
-                            <button class="btn btn-primary" id="duckStartBtn"><span>🦆</span> Start Session</button>
+                            <button class="btn btn-primary" id="duckStartBtn"><span>→</span> Start Session</button>
                             <div class="duck-demo-chips">
                                 <button class="suggestion-chip duck-demo-chip" data-demo="infinite-loop">Infinite re-render</button>
                                 <button class="suggestion-chip duck-demo-chip" data-demo="state-bug">State not updating</button>
@@ -436,13 +436,13 @@ Example:
                             <div class="duck-messages" id="duckMessages"></div>
                             <div class="duck-input-area" id="duckInputArea">
                                 <textarea id="duckInput" class="feature-input feature-textarea-sm" placeholder="Think about it... then type your answer here"></textarea>
-                                <button class="btn btn-primary" id="duckReplyBtn"><span>💬</span> Reply</button>
+                                <button class="btn btn-primary" id="duckReplyBtn"><span>→</span> Reply</button>
                             </div>
                             <div class="duck-complete" id="duckComplete" style="display:none;">
-                                <div class="duck-complete-icon">🎉</div>
+                                <div class="duck-complete-icon">✓</div>
                                 <h3>Session Complete!</h3>
                                 <p id="duckCompleteSummary"></p>
-                                <button class="btn btn-primary" id="duckRestartBtn"><span>🦆</span> New Session</button>
+                                <button class="btn btn-primary" id="duckRestartBtn"><span>→</span> New Session</button>
                             </div>
                         </div>
                     </div>
@@ -465,7 +465,7 @@ Example:
             </div>
 
             <div class="kb-card glass-card">
-                <h4>📚 Knowledge Base</h4>
+                <h4>Knowledge Base</h4>
                 <div class="kb-search"><input type="text" placeholder="Search solutions..." class="kb-search-input"></div>
                 <div class="kb-items">
                     <div class="kb-item"><span class="kb-tag p3-tag">P3</span><div><p class="kb-title">Fix: React useEffect infinite loop</p><span class="kb-meta">AI Resolved · 2 min ago</span></div></div>
@@ -476,14 +476,14 @@ Example:
             </div>
 
             <div class="activity-card glass-card">
-                <h4>🔴 Live Activity</h4>
+                <h4>Live Activity</h4>
                 <div class="activity-feed" id="activityFeed">
                     <div class="activity-item"><span class="activity-dot"></span><span>System initialized</span><span class="activity-time">Just now</span></div>
                 </div>
             </div>
 
             <div class="language-card glass-card">
-                <h4>🌐 Language</h4>
+                <h4>Language</h4>
                 <select class="language-select">
                     <option value="en">English</option>
                     <option value="hi">हिन्दी (Hindi)</option>

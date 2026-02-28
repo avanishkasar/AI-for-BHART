@@ -5,42 +5,42 @@
 
 /* ── CSS Variables ── */
 :root {
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #12121a;
-    --bg-card: rgba(255, 255, 255, 0.03);
-    --bg-card-hover: rgba(255, 255, 255, 0.06);
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --bg-primary: #0c0d11;
+    --bg-secondary: #13141a;
+    --bg-card: rgba(255, 255, 255, 0.025);
+    --bg-card-hover: rgba(255, 255, 255, 0.045);
+    --glass-bg: rgba(255, 255, 255, 0.035);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 
-    --text-primary: #f0f0f5;
-    --text-secondary: #a0a0b5;
-    --text-muted: #6a6a80;
+    --text-primary: #e8e8ed;
+    --text-secondary: #9a9ab0;
+    --text-muted: #5c5c72;
 
-    --accent-red: #ff3b5c;
-    --accent-red-glow: rgba(255, 59, 92, 0.3);
-    --accent-orange: #ff8c42;
-    --accent-yellow: #ffd84d;
-    --accent-green: #00e676;
-    --accent-blue: #4d9fff;
-    --accent-purple: #b47eff;
-    --accent-cyan: #00e5ff;
+    --accent-red: #e5364f;
+    --accent-red-glow: rgba(229, 54, 79, 0.2);
+    --accent-orange: #e07a3a;
+    --accent-yellow: #d4b63e;
+    --accent-green: #34b872;
+    --accent-blue: #4a8fe7;
+    --accent-purple: #9a6dd7;
+    --accent-cyan: #3ab5cc;
 
     /* Severity Colors */
-    --p0-color: #ff1744;
-    --p0-bg: rgba(255, 23, 68, 0.15);
-    --p1-color: #ff6d00;
-    --p1-bg: rgba(255, 109, 0, 0.15);
-    --p2-color: #ffd600;
-    --p2-bg: rgba(255, 214, 0, 0.15);
-    --p3-color: #00e676;
-    --p3-bg: rgba(0, 230, 118, 0.15);
-    --p4-color: #448aff;
-    --p4-bg: rgba(68, 138, 255, 0.15);
+    --p0-color: #e5364f;
+    --p0-bg: rgba(229, 54, 79, 0.12);
+    --p1-color: #e07a3a;
+    --p1-bg: rgba(224, 122, 58, 0.12);
+    --p2-color: #d4b63e;
+    --p2-bg: rgba(212, 182, 62, 0.12);
+    --p3-color: #34b872;
+    --p3-bg: rgba(52, 184, 114, 0.12);
+    --p4-color: #4a8fe7;
+    --p4-bg: rgba(74, 143, 231, 0.12);
 
-    --gradient-primary: linear-gradient(135deg, #4d9fff, #b47eff);
-    --gradient-red: linear-gradient(135deg, #ff3b5c, #ff8c42);
-    --gradient-green: linear-gradient(135deg, #00e676, #00e5ff);
+    --gradient-primary: linear-gradient(135deg, #4a8fe7, #9a6dd7);
+    --gradient-red: linear-gradient(135deg, #e5364f, #e07a3a);
+    --gradient-green: linear-gradient(135deg, #34b872, #3ab5cc);
 
     --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -188,9 +188,8 @@ img {
 
 .glass-card:hover {
     background: var(--bg-card-hover);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.35);
 }
 
 .glass-card-inner {
@@ -296,8 +295,7 @@ img {
 }
 
 .logo-icon {
-    font-size: 1.5rem;
-    animation: pulse-glow 2s infinite;
+    font-size: 1.3rem;
 }
 
 @keyframes pulse-glow {
@@ -665,8 +663,18 @@ img {
 }
 
 .problem-icon {
-    font-size: 2.5rem;
+    font-size: 1.6rem;
+    font-weight: 700;
     margin-bottom: 16px;
+    color: var(--accent-blue);
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(74, 143, 231, 0.08);
+    border-radius: 10px;
+    border: 1px solid rgba(74, 143, 231, 0.12);
 }
 
 .problem-title {
@@ -719,20 +727,23 @@ img {
 
 .feature-icon-wrap {
     position: relative;
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
     margin-bottom: 20px;
 }
 
 .feature-icon {
-    font-size: 2rem;
-    width: 60px;
-    height: 60px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    width: 52px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(74, 143, 231, 0.1);
     border-radius: var(--radius-md);
+    border: 1px solid rgba(74, 143, 231, 0.15);
     position: relative;
     z-index: 1;
 }
@@ -809,8 +820,18 @@ img {
 }
 
 .step-icon {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
     margin-bottom: 8px;
+    color: var(--accent-blue);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(74, 143, 231, 0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(74, 143, 231, 0.12);
 }
 
 .step-card h3 {
@@ -890,7 +911,17 @@ img {
 }
 
 .response-icon {
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(74, 143, 231, 0.1);
+    border-radius: 6px;
+    flex-shrink: 0;
 }
 
 .severity-pulse {
@@ -994,7 +1025,10 @@ img {
 }
 
 .arch-node span {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    margin-right: 4px;
 }
 
 .arch-arrow {
