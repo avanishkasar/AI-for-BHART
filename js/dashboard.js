@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initQuickActions();
     startActivitySimulation();
     updateCounters();
+    initTabs();
+    initDependencyAnalyzer();
+    initAncestryTree();
+    initContextCapsule();
+    initQuietMentor();
 });
 
 /* ── State ── */
@@ -468,4 +473,471 @@ function showToast(message) {
 /* ── Utility ── */
 function formatTime(date) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/* ==============================================
+   NEW FEATURES — Tab Switching, Dep Danger,
+   Error Ancestry, Context Capsule, Quiet Mentor
+   ============================================== */
+
+/* ── Tab Switching ── */
+function initTabs() {
+    document.querySelectorAll('.dash-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const panelId = 'tab-' + tab.dataset.tab;
+            const panel = document.getElementById(panelId);
+            if (panel) panel.classList.add('active');
+        });
+    });
+}
+
+/* ── Dependency Danger Score ── */
+const depDatabase = {
+    'moment': {
+        score: 72, lastCommit: '14 months ago', cves: 3, busFactor: 2,
+        weeklyDownloads: '12M', abandoned: true, modern: 'date-fns or Day.js',
+        reason: 'Mutable API, huge bundle size (67KB gzipped). The community has moved to lighter alternatives. Tree-shaking is also impossible.'
+    },
+    'left-pad': {
+        score: 95, lastCommit: '8 years ago', cves: 0, busFactor: 1,
+        weeklyDownloads: '3M', abandoned: true, modern: 'String.prototype.padStart()',
+        reason: 'Unpublished from npm in 2016, breaking thousands of packages. Its 11-line functionality is now native in JavaScript ES2017.'
+    },
+    'lodash': {
+        score: 18, lastCommit: '6 months ago', cves: 1, busFactor: 5,
+        weeklyDownloads: '45M', abandoned: false, modern: null,
+        reason: 'Still widely maintained. Consider importing individual methods (lodash/get) for better tree-shaking instead of the full bundle.'
+    },
+    'request': {
+        score: 88, lastCommit: '4 years ago', cves: 5, busFactor: 1,
+        weeklyDownloads: '18M', abandoned: true, modern: 'axios or native fetch()',
+        reason: 'Officially deprecated by maintainers in 2020. No longer receiving security patches. High CVE count.'
+    },
+    'colors': {
+        score: 82, lastCommit: '3 years ago', cves: 2, busFactor: 1,
+        weeklyDownloads: '8M', abandoned: true, modern: 'chalk or kleur',
+        reason: 'In January 2022 the maintainer intentionally corrupted the package with an infinite loop as a protest. Community forked to "colors.js".'
+    },
+    'faker': {
+        score: 35, lastCommit: '2 months ago', cves: 0, busFactor: 8,
+        weeklyDownloads: '3.5M', abandoned: false, modern: null,
+        reason: 'Community fork after the original maintainer deleted the repo. Actively maintained with a large contributor base — relatively safe.'
+    },
+};
+
+function initDependencyAnalyzer() {
+    const btn = document.getElementById('depAnalyzeBtn');
+    const input = document.getElementById('depInput');
+
+    document.querySelectorAll('.dep-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            input.value = chip.dataset.pkg;
+            analyzeDependency(chip.dataset.pkg);
+        });
+    });
+
+    btn?.addEventListener('click', () => analyzeDependency(input.value.trim()));
+
+    input?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') analyzeDependency(input.value.trim());
+    });
+}
+
+function analyzeDependency(pkg) {
+    if (!pkg) { showToast('Enter a package name first'); return; }
+
+    const result = document.getElementById('depResult');
+    const data = depDatabase[pkg.toLowerCase()] || {
+        score: Math.floor(Math.random() * 50) + 15,
+        lastCommit: (Math.floor(Math.random() * 12) + 1) + ' months ago',
+        cves: Math.floor(Math.random() * 3),
+        busFactor: Math.floor(Math.random() * 5) + 1,
+        weeklyDownloads: (Math.random() * 8 + 0.5).toFixed(1) + 'M',
+        abandoned: Math.random() > 0.6,
+        modern: null,
+        reason: 'Package analyzed. No entry in our known-risk database — monitor regularly for CVEs and abandoned status.',
+    };
+
+    result.style.display = 'flex';
+
+    const scoreColor = data.score >= 75 ? '#ff3b5c' : data.score >= 50 ? '#ffcc00' : '#00e676';
+    const verdict = data.score >= 75 ? '⚠️ Risky' : data.score >= 50 ? '⚡ Caution' : '✅ Safe';
+    const circumference = 314;
+    const offset = circumference - (data.score / 100) * circumference;
+
+    const circle = document.getElementById('dangerRingCircle');
+    circle.style.stroke = scoreColor;
+    circle.style.strokeDashoffset = circumference;
+    setTimeout(() => {
+        circle.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';
+        circle.style.strokeDashoffset = offset;
+    }, 80);
+
+    document.getElementById('dangerScoreNum').textContent = data.score;
+    document.getElementById('dangerScoreNum').style.color = scoreColor;
+    document.getElementById('dangerScoreVerdict').textContent = verdict;
+    document.getElementById('dangerScoreVerdict').style.color = scoreColor;
+
+    const cveSeverity = data.cves >= 4 ? 'critical' : data.cves >= 2 ? 'danger' : data.cves >= 1 ? 'warning' : 'safe';
+    const commitSeverity = parseInt(data.lastCommit) > 12 ? 'danger' : parseInt(data.lastCommit) > 6 ? 'warning' : 'safe';
+    const abandonSeverity = data.abandoned ? 'critical' : 'safe';
+
+    document.getElementById('depMetrics').innerHTML = `
+        <div class="dep-metric ${commitSeverity}">
+            <div class="dep-metric-icon">📅</div>
+            <div class="dep-metric-info">
+                <div class="dep-metric-label">Last Commit</div>
+                <div class="dep-metric-value">${data.lastCommit}</div>
+            </div>
+        </div>
+        <div class="dep-metric ${cveSeverity}">
+            <div class="dep-metric-icon">🔐</div>
+            <div class="dep-metric-info">
+                <div class="dep-metric-label">Known CVEs</div>
+                <div class="dep-metric-value">${data.cves} vulnerabilit${data.cves !== 1 ? 'ies' : 'y'}</div>
+            </div>
+        </div>
+        <div class="dep-metric ${data.busFactor <= 2 ? 'warning' : 'safe'}">
+            <div class="dep-metric-icon">🚌</div>
+            <div class="dep-metric-info">
+                <div class="dep-metric-label">Bus Factor</div>
+                <div class="dep-metric-value">${data.busFactor} maintainer${data.busFactor !== 1 ? 's' : ''}</div>
+            </div>
+        </div>
+        <div class="dep-metric safe">
+            <div class="dep-metric-icon">📊</div>
+            <div class="dep-metric-info">
+                <div class="dep-metric-label">Weekly Downloads</div>
+                <div class="dep-metric-value">${data.weeklyDownloads}</div>
+            </div>
+        </div>
+        <div class="dep-metric ${abandonSeverity}">
+            <div class="dep-metric-icon">${data.abandoned ? '🪦' : '💚'}</div>
+            <div class="dep-metric-info">
+                <div class="dep-metric-label">Maintenance Status</div>
+                <div class="dep-metric-value">${data.abandoned ? 'Abandoned / Deprecated' : 'Actively Maintained'}</div>
+            </div>
+        </div>
+        ${data.modern ? `
+        <div class="dep-metric safe" style="border-color:var(--p3-color);">
+            <div class="dep-metric-icon">✨</div>
+            <div class="dep-metric-info">
+                <div class="dep-metric-label">Modern Alternative</div>
+                <div class="dep-metric-value" style="font-family:var(--font-mono);font-size:0.85rem;">${data.modern}</div>
+            </div>
+        </div>` : ''}
+        <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:0.83rem;color:var(--text-secondary);line-height:1.6;border:1px solid var(--glass-border);">
+            💡 ${data.reason}
+        </div>
+    `;
+
+    addActivity(`📦 Dep analyzed: <strong>${pkg}</strong> — Danger Score ${data.score}/100`);
+}
+
+/* ── Error Ancestry Tree ── */
+function initAncestryTree() {
+    document.getElementById('ancestryAnalyzeBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('ancestryInput').value.trim();
+        if (!input) { showToast('Paste a stack trace first'); return; }
+        buildAncestryTree(input);
+    });
+}
+
+function buildAncestryTree(stackTrace) {
+    const lower = stackTrace.toLowerCase();
+    const result = document.getElementById('ancestryResult');
+    const tree = document.getElementById('ancestryTree');
+    result.style.display = 'block';
+    tree.innerHTML = '';
+
+    const hasNull    = lower.includes('undefined') || lower.includes('null') || lower.includes('cannot read');
+    const hasAsync   = lower.includes('async') || lower.includes('await') || lower.includes('promise') || lower.includes('unhandled');
+    const hasCORS    = lower.includes('cors') || lower.includes('cross-origin') || lower.includes('access-control');
+    const hasModule  = lower.includes('cannot find module') || lower.includes('module not found');
+    const hasMemory  = lower.includes('heap') || lower.includes('out of memory') || lower.includes('stack overflow');
+
+    let nodes;
+
+    if (hasModule) {
+        nodes = [
+            { type: 'root', label: 'Module Resolution Failure', desc: 'Node.js cannot locate the requested module at the given path or package name.', file: 'Runtime error at import/require statement' },
+            { type: 'cause', label: 'Path or package name mismatch', desc: 'The module was either not installed, misspelled, or the import path is wrong relative to the current file.', file: 'Check: package.json dependencies & relative path' },
+            { type: 'origin', label: 'Missing install step', desc: 'A new dependency was added to package.json but npm install was not re-run, or the file was renamed without updating imports.', file: null },
+            { type: 'decision', label: 'Root Decision', desc: 'No import validation or automatic install hooks in the project setup. Adding a pre-check script or CI step would catch this immediately.', file: null },
+        ];
+    } else if (hasCORS) {
+        nodes = [
+            { type: 'root', label: 'CORS Blocked Request', desc: 'Browser enforced the Same-Origin Policy and rejected the cross-origin request before it reached your code.', file: 'DevTools → Network → preflight OPTIONS request' },
+            { type: 'cause', label: 'Missing Access-Control headers', desc: 'Server response does not include Access-Control-Allow-Origin for this origin. Preflight fails, main request never fires.', file: 'Check server middleware / response headers' },
+            { type: 'origin', label: 'Environment config mismatch', desc: 'CORS was never configured because the original API was built for same-origin use. When deployed or tested cross-origin, the missing config became a blocker.', file: null },
+            { type: 'decision', label: 'Root Decision', desc: 'API was designed without considering cross-origin clients. Proper CORS middleware (e.g. cors npm package) should be a default in any HTTP server template.', file: null },
+        ];
+    } else if (hasMemory) {
+        nodes = [
+            { type: 'root', label: 'Memory Exhaustion / Stack Overflow', desc: 'Process exceeded V8 heap limit or call stack depth, causing a fatal crash.', file: 'Check: heap snapshot or recursive call depth' },
+            { type: 'cause', label: 'Unchecked recursion or large data accumulation', desc: 'Either a function calls itself without a proper base case, or large objects are being accumulated without garbage collection opportunity.', file: null },
+            { type: 'origin', label: 'Missing termination condition or unbounded loop', desc: 'The logic that grows the call stack or heap was written without an upper bound — works for small inputs, fails at scale.', file: null },
+            { type: 'decision', label: 'Root Decision', desc: 'No load testing or large-data scenario was considered during initial design. Iterative approaches should replace recursion for deep trees.', file: null },
+        ];
+    } else if (hasAsync) {
+        nodes = [
+            { type: 'root', label: 'Unhandled Promise Rejection', desc: 'An async operation (fetch, DB call, file read) rejected or threw but the error was not caught anywhere in the call chain.', file: 'Look for: UnhandledPromiseRejectionWarning in Node' },
+            { type: 'cause', label: 'Missing await or missing .catch()', desc: 'A Promise was created but either not awaited, or its rejection path was never handled, so the error propagated silently then crashed.', file: 'Check: async functions without try/catch' },
+            { type: 'origin', label: 'Error boundary was never added', desc: 'The function was first written synchronously, then converted to async later — but no error handling was retrofitted when the pattern changed.', file: null },
+            { type: 'decision', label: 'Root Decision', desc: 'Async error handling was treated as optional. All async operations need either try/catch or .catch() — this should be a code review checklist item.', file: null },
+        ];
+    } else if (hasNull) {
+        nodes = [
+            { type: 'root', label: 'Null / Undefined Access (Surface Error)', desc: 'Code tried to read a property or call a method on a value that does not exist at runtime — TypeError.', file: 'Check: the line number in the stack trace above' },
+            { type: 'cause', label: 'Propagation — No null guard', desc: 'The component/function received data and immediately used it without checking if it arrived. A simple optional chaining (?.) or early return would have stopped propagation here.', file: 'Add: if (!data) return; or data?.property' },
+            { type: 'origin', label: 'Data contract not enforced', desc: 'An API call, async fetch, or parent component passed an undefined / null value that the receiving function expected to always be present.', file: 'Check: where this data is first set / fetched' },
+            { type: 'decision', label: 'Root Decision', desc: 'No default value was defined when the data schema was first designed. This made a crash inevitable the moment any edge case (empty response, race condition, deleted record) occurred.', file: 'Fix: add defaults at the data source' },
+        ];
+    } else {
+        // Generic — parse lines from stack trace
+        const lines = stackTrace.split('\n').filter(l => l.trim()).slice(0, 3);
+        nodes = [
+            { type: 'root', label: 'Surface Error', desc: lines[0] || 'The visible runtime exception that was thrown to your console.', file: lines[1] || null },
+            { type: 'cause', label: 'Immediate Trigger', desc: 'The function or module that directly failed when it encountered unexpected input, state, or behaviour.', file: lines[2] || null },
+            { type: 'origin', label: 'Upstream Assumption Gap', desc: 'An assumption upstream was never validated — incorrect data type, missing value, or unexpected state flowed downstream unchecked.', file: null },
+            { type: 'decision', label: 'Root Decision', desc: 'The original design/implementation decision (missing validation, wrong type assumption, absent error boundary) that made this bug statistically inevitable once edge-cases appeared.', file: null },
+        ];
+    }
+
+    const typeMap = { root: '🔴', cause: '🟠', origin: '🟡', decision: '🔵' };
+
+    nodes.forEach((node, i) => {
+        if (i > 0) {
+            const arrow = document.createElement('div');
+            arrow.className = 'tree-arrow';
+            arrow.textContent = '↓';
+            tree.appendChild(arrow);
+        }
+
+        const el = document.createElement('div');
+        el.className = `tree-node ${node.type}`;
+        el.style.animationDelay = (i * 0.15) + 's';
+        el.innerHTML = `
+            <div class="tree-node-card">
+                <div class="tree-node-type">${['Surface Error', 'Propagation Layer', 'Origin Gap', 'Root Decision'][i]}</div>
+                <div class="tree-node-title">${typeMap[node.type]} ${node.label}</div>
+                <div class="tree-node-desc">${node.desc}</div>
+                ${node.file ? `<div class="tree-node-file">📍 ${node.file}</div>` : ''}
+            </div>`;
+        tree.appendChild(el);
+    });
+
+    addActivity('🌳 Error ancestry traced — root decision identified');
+}
+
+/* ── Context Capsule ── */
+function initContextCapsule() {
+    document.getElementById('capsuleGenerateBtn')?.addEventListener('click', generateCapsule);
+    document.getElementById('capsuleCopyBtn')?.addEventListener('click', () => {
+        const output = document.getElementById('capsuleOutput');
+        if (output) {
+            navigator.clipboard.writeText(output.innerText).then(() => {
+                showToast('Context Capsule copied to clipboard! 🧬');
+            });
+        }
+    });
+}
+
+function generateCapsule() {
+    const feature  = document.getElementById('capsuleFeature').value.trim() || 'Untitled Feature';
+    const what     = document.getElementById('capsuleWhat').value.trim();
+    const failed   = document.getElementById('capsuleFailed').value.trim();
+    const nextDev  = document.getElementById('capsuleNextDev').value.trim();
+
+    if (!what) { showToast('Fill in what you built first'); return; }
+
+    const result = document.getElementById('capsuleResult');
+    const output = document.getElementById('capsuleOutput');
+    result.style.display = 'flex';
+
+    const timestamp = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const tags = generateCapsuleTags(what + ' ' + failed);
+
+    output.innerHTML = `
+        <h4>🧬 CONTEXT CAPSULE</h4>
+        <div class="capsule-section">
+            <strong style="color:var(--text-muted);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Feature / PR</strong><br>
+            ${feature}
+            <br><br>
+            <strong style="color:var(--text-muted);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Generated</strong><br>
+            ${timestamp}
+        </div>
+        <h4>📦 What Was Built</h4>
+        <div class="capsule-section">${what}</div>
+        ${failed ? `<h4>❌ What Was Tried & Failed</h4><div class="capsule-section">${failed}</div>` : ''}
+        ${nextDev ? `<h4>🔑 Next Dev Needs To Know</h4><div class="capsule-section">${nextDev}</div>` : ''}
+        <h4>⚡ AI Insights</h4>
+        <div class="capsule-section">${generateInsights(what, failed)}</div>
+        <h4>🏷️ Auto-Tags</h4>
+        <div class="capsule-section" style="font-family:var(--font-mono);font-size:0.83rem;color:var(--accent-blue);">${tags}</div>
+    `;
+
+    addActivity(`🧬 Context Capsule generated: <strong>${feature}</strong>`);
+}
+
+function generateCapsuleTags(text) {
+    const lower = text.toLowerCase();
+    const tags = [];
+    if (lower.includes('auth') || lower.includes('jwt') || lower.includes('login') || lower.includes('token')) tags.push('#authentication');
+    if (lower.includes('api') || lower.includes('fetch') || lower.includes('endpoint') || lower.includes('rest')) tags.push('#api-integration');
+    if (lower.includes('db') || lower.includes('database') || lower.includes('sql') || lower.includes('mongo')) tags.push('#database');
+    if (lower.includes('react') || lower.includes('component') || lower.includes('hook') || lower.includes('state')) tags.push('#react');
+    if (lower.includes('cors')) tags.push('#cors');
+    if (lower.includes('async') || lower.includes('await') || lower.includes('promise')) tags.push('#async');
+    if (lower.includes('performance') || lower.includes('slow') || lower.includes('cache') || lower.includes('optimiz')) tags.push('#performance');
+    if (lower.includes('test') || lower.includes('spec') || lower.includes('jest') || lower.includes('vitest')) tags.push('#testing');
+    if (lower.includes('style') || lower.includes('css') || lower.includes('design') || lower.includes('ui')) tags.push('#frontend');
+    if (tags.length === 0) tags.push('#feature', '#general');
+    return tags.join('  ');
+}
+
+function generateInsights(what, failed) {
+    const lower = (what + ' ' + failed).toLowerCase();
+    const insights = [];
+    if (lower.includes('async') || lower.includes('await')) insights.push('Async patterns detected — ensure all await calls are wrapped in try/catch and have fallback states.');
+    if (lower.includes('state') || lower.includes('redux') || lower.includes('context')) insights.push('State management involved — watch for stale closure issues and ensure cleanup on unmount.');
+    if (lower.includes('database') || lower.includes('query') || lower.includes('sql')) insights.push('Database operations present — verify all queries are parameterized and connection pooling is configured correctly.');
+    if (lower.includes('auth') || lower.includes('token') || lower.includes('password')) insights.push('Authentication logic present — have this code reviewed for security vulnerabilities before merging.');
+    if (insights.length === 0) insights.push('Review the data flow from input to output. Verify every assumption about shape and type is either enforced by TypeScript or guarded with a runtime check.');
+    insights.push('Add integration tests for the edge cases that surfaced during the failed attempts described above.');
+    return insights.map(i => '• ' + i).join('<br>');
+}
+
+/* ── Quiet Mentor ── */
+function initQuietMentor() {
+    document.getElementById('mentorAnalyzeBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('mentorInput').value.trim();
+        if (!input) { showToast('Paste your session code or diff first'); return; }
+        generateMentorDebrief(input);
+    });
+}
+
+function generateMentorDebrief(code) {
+    const result  = document.getElementById('mentorResult');
+    const debrief = document.getElementById('mentorDebrief');
+    result.style.display = 'block';
+    debrief.innerHTML = '';
+
+    const lower = code.toLowerCase();
+    const lines = code.split('\n').length;
+    const insights = [];
+
+    // Check for console logs
+    const consoleLogs = (code.match(/console\.(log|error|warn|info)/g) || []).length;
+    if (consoleLogs > 0) {
+        insights.push({
+            type: 'warning',
+            icon: '🪵',
+            title: `${consoleLogs} Console Statement${consoleLogs > 1 ? 's' : ''} Left Behind`,
+            text: `You left ${consoleLogs} <code>console.log/error</code> statement${consoleLogs > 1 ? 's' : ''} in your code. Remove these before committing, or replace with a structured logger (winston, pino, loglevel) with severity levels.`,
+            code: null,
+        });
+    }
+
+    // async without error handling
+    if ((lower.includes('fetch(') || lower.includes('await ')) && !lower.includes('try') && !lower.includes('.catch')) {
+        insights.push({
+            type: 'critical',
+            icon: '💥',
+            title: 'Async Operations Without Error Boundaries',
+            text: `Your async calls have no <code>try/catch</code> blocks or <code>.catch()</code> handlers. If the network or operation fails, you'll get an UnhandledPromiseRejection that can crash Node servers or silently break UI.`,
+            code: `// Wrap like this:\ntry {\n  const data = await fetchUser(id);\n} catch (err) {\n  console.error('fetchUser failed:', err);\n  return null; // fallback\n}`,
+        });
+    }
+
+    // TODOs / FIXMEs
+    const todos = (code.match(/TODO|FIXME|HACK|XXX/gi) || []).length;
+    if (todos > 0) {
+        insights.push({
+            type: 'warning',
+            icon: '📌',
+            title: `${todos} Unresolved TODO/FIXME Marker${todos > 1 ? 's' : ''}`,
+            text: `You marked ${todos} piece${todos > 1 ? 's' : ''} of code as needing follow-up. Comments like TODO rarely get revisited — move these to your issue tracker now while context is fresh.`,
+            code: null,
+        });
+    }
+
+    // setTimeout/setInterval without cleanup
+    if (lower.includes('settimeout') || lower.includes('setinterval')) {
+        insights.push({
+            type: 'warning',
+            icon: '⏱️',
+            title: 'Timer Used — Verify Cleanup on Teardown',
+            text: `<code>setTimeout/setInterval</code> detected. Verify these are cleared (clearTimeout/clearInterval) when the component unmounts or module tears down — uncleaned timers are a leading cause of memory leaks in long-running apps.`,
+            code: null,
+        });
+    }
+
+    // Large session
+    if (lines > 80) {
+        insights.push({
+            type: 'tip',
+            icon: '📐',
+            title: `Large Session — ${lines} Lines Modified`,
+            text: `Your session touched ${lines} lines. If you rewrote any logic more than once, that's a signal the abstraction is still evolving. Consider extracting a utility function or custom hook to stabilise the interface.`,
+            code: null,
+        });
+    }
+
+    // Positive / clean code
+    if (insights.length === 0) {
+        insights.push({
+            type: 'positive',
+            icon: '✅',
+            title: 'Clean, Consistent Session',
+            text: `No obvious issues detected. Your code shows consistent naming conventions and readable structure. Consider adding JSDoc comments to public functions — the intent is clearest right now, while the session is fresh.`,
+            code: null,
+        });
+        insights.push({
+            type: 'tip',
+            icon: '🧪',
+            title: 'Write Tests While Intent is Fresh',
+            text: `You just built something — adding 2–3 edge-case unit tests right now takes 10 minutes and prevents regressions for months. The scenarios you tried (and failed) today are exactly the test cases you need.`,
+            code: null,
+        });
+    }
+
+    // Always add reflection observation
+    insights.push({
+        type: 'tip',
+        icon: '🔍',
+        title: 'End-of-Session Reflection',
+        text: `Identify the <strong>single decision point</strong> that cost the most time today — that's your highest-ROI area to improve next session. Was it unclear requirements, a missing tool, or an environment issue? Log it.`,
+        code: null,
+    });
+
+    insights.slice(0, 3).forEach((obs, i) => {
+        const item = document.createElement('div');
+        item.className = `mentor-insight ${obs.type}`;
+        item.style.animationDelay = (i * 0.18) + 's';
+        item.innerHTML = `
+            <div class="mentor-insight-icon">${obs.icon}</div>
+            <div class="mentor-insight-body">
+                <div class="mentor-insight-title">${obs.title}</div>
+                <div class="mentor-insight-text">${obs.text}</div>
+                ${obs.code ? `<div class="mentor-insight-code">${obs.code}</div>` : ''}
+            </div>`;
+        debrief.appendChild(item);
+    });
+
+    // Update session history
+    const history = document.getElementById('mentorHistory');
+    const emptyEl = history.querySelector('.empty-state-small');
+    if (emptyEl) emptyEl.remove();
+
+    const entry = document.createElement('div');
+    entry.className = 'mentor-history-item';
+    entry.innerHTML = `<span>🦉</span><span style="flex:1;">Session at ${formatTime(new Date())} — ${lines} lines, ${Math.min(insights.length, 3)} insights</span>`;
+    history.insertBefore(entry, history.firstChild);
+
+    addActivity(`🦉 Mentor debrief done — ${Math.min(insights.length, 3)} insights across ${lines} lines`);
+}
 }

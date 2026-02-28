@@ -21,19 +21,21 @@
                 <span class="logo-icon">🚨</span>
                 <span class="logo-text">CodeRescue<span class="logo-ai">AI</span></span>
             </a>
-            <div class="dash-nav-center">
-                <div class="system-status">
-                    <span class="status-dot online"></span>
-                    <span>System Online</span>
-                </div>
+            <!-- Feature Tabs Nav -->
+            <div class="dash-tabs">
+                <button class="dash-tab active" data-tab="chat">🚨 Emergency Chat</button>
+                <button class="dash-tab" data-tab="dependency">📦 Dep Danger</button>
+                <button class="dash-tab" data-tab="ancestry">🌳 Error Ancestry</button>
+                <button class="dash-tab" data-tab="capsule">🧬 Context Capsule</button>
+                <button class="dash-tab" data-tab="mentor">🦉 Quiet Mentor</button>
             </div>
             <div class="dash-nav-right">
                 <div class="nav-stat-mini">
-                    <span class="mini-label">Active Incidents</span>
+                    <span class="mini-label">Active</span>
                     <span class="mini-value" id="activeCount">0</span>
                 </div>
                 <div class="nav-stat-mini">
-                    <span class="mini-label">AI Resolved Today</span>
+                    <span class="mini-label">Resolved</span>
                     <span class="mini-value" id="resolvedCount">0</span>
                 </div>
                 <div class="user-avatar">
@@ -47,7 +49,6 @@
     <main class="dash-main">
         <!-- Left Panel — Panic + Active Issues -->
         <aside class="dash-sidebar">
-            <!-- Panic Button Card -->
             <div class="panic-card glass-card">
                 <div class="panic-bg-pulse"></div>
                 <h3>Emergency Assistance</h3>
@@ -64,70 +65,40 @@
                 <p class="panic-hint">Press to activate emergency support</p>
             </div>
 
-            <!-- Quick Actions -->
             <div class="quick-actions glass-card">
                 <h4>Quick Actions</h4>
-                <button class="quick-btn" data-action="paste-error">
-                    <span>📋</span> Paste Error Log
-                </button>
-                <button class="quick-btn" data-action="upload-code">
-                    <span>📁</span> Upload Code File
-                </button>
-                <button class="quick-btn" data-action="voice-call">
-                    <span>🎙️</span> Start Voice Call
-                </button>
-                <button class="quick-btn" data-action="screen-share">
-                    <span>🖥️</span> Screen Share
-                </button>
+                <button class="quick-btn" data-action="paste-error"><span>📋</span> Paste Error Log</button>
+                <button class="quick-btn" data-action="upload-code"><span>📁</span> Upload Code File</button>
+                <button class="quick-btn" data-action="voice-call"><span>🎙️</span> Start Voice Call</button>
+                <button class="quick-btn" data-action="screen-share"><span>🖥️</span> Screen Share</button>
             </div>
 
-            <!-- Active Incidents -->
             <div class="incidents-card glass-card">
                 <div class="incidents-header">
                     <h4>Active Incidents</h4>
                     <span class="incident-count" id="incidentBadge">0</span>
                 </div>
                 <div class="incidents-list" id="incidentsList">
-                    <div class="empty-state">
-                        <span>✅</span>
-                        <p>No active incidents</p>
-                    </div>
+                    <div class="empty-state"><span>✅</span><p>No active incidents</p></div>
                 </div>
             </div>
         </aside>
 
-        <!-- Center Panel — Main Interaction Area -->
+        <!-- Center Panel — Tab Content -->
         <section class="dash-center">
-            <!-- Triage Modal (Hidden by default) -->
+
+            <!-- Triage Overlay -->
             <div class="triage-overlay" id="triageOverlay">
                 <div class="triage-modal glass-card">
                     <div class="triage-header">
                         <h3>🔍 AI Triage in Progress</h3>
-                        <div class="triage-progress">
-                            <div class="triage-progress-bar" id="triageProgressBar"></div>
-                        </div>
+                        <div class="triage-progress"><div class="triage-progress-bar" id="triageProgressBar"></div></div>
                     </div>
                     <div class="triage-steps" id="triageSteps">
-                        <div class="triage-step" data-step="1">
-                            <span class="triage-step-icon">📸</span>
-                            <span class="triage-step-text">Capturing context...</span>
-                            <span class="triage-step-status">⏳</span>
-                        </div>
-                        <div class="triage-step" data-step="2">
-                            <span class="triage-step-icon">🧠</span>
-                            <span class="triage-step-text">Analyzing code patterns...</span>
-                            <span class="triage-step-status">⏳</span>
-                        </div>
-                        <div class="triage-step" data-step="3">
-                            <span class="triage-step-icon">🏷️</span>
-                            <span class="triage-step-text">Classifying severity...</span>
-                            <span class="triage-step-status">⏳</span>
-                        </div>
-                        <div class="triage-step" data-step="4">
-                            <span class="triage-step-icon">🔀</span>
-                            <span class="triage-step-text">Routing to best resource...</span>
-                            <span class="triage-step-status">⏳</span>
-                        </div>
+                        <div class="triage-step" data-step="1"><span class="triage-step-icon">📸</span><span class="triage-step-text">Capturing context...</span><span class="triage-step-status">⏳</span></div>
+                        <div class="triage-step" data-step="2"><span class="triage-step-icon">🧠</span><span class="triage-step-text">Analyzing code patterns...</span><span class="triage-step-status">⏳</span></div>
+                        <div class="triage-step" data-step="3"><span class="triage-step-icon">🏷️</span><span class="triage-step-text">Classifying severity...</span><span class="triage-step-status">⏳</span></div>
+                        <div class="triage-step" data-step="4"><span class="triage-step-icon">🔀</span><span class="triage-step-text">Routing to best resource...</span><span class="triage-step-status">⏳</span></div>
                     </div>
                     <div class="triage-result" id="triageResult" style="display:none;">
                         <div class="triage-severity" id="triageSeverity"></div>
@@ -137,140 +108,226 @@
                 </div>
             </div>
 
-            <!-- Chat Interface -->
-            <div class="chat-container glass-card" id="chatContainer">
-                <div class="chat-header">
-                    <div class="chat-header-left">
-                        <div class="ai-avatar-small">
-                            <span>🤖</span>
+            <!-- TAB: Emergency Chat -->
+            <div class="tab-panel active" id="tab-chat">
+                <div class="chat-container glass-card">
+                    <div class="chat-header">
+                        <div class="chat-header-left">
+                            <div class="ai-avatar-small"><span>🤖</span></div>
+                            <div>
+                                <h4>CodeRescue AI Assistant</h4>
+                                <span class="chat-status"><span class="status-dot online"></span> Online — Ready to help</span>
+                            </div>
                         </div>
-                        <div>
-                            <h4>CodeRescue AI Assistant</h4>
-                            <span class="chat-status"><span class="status-dot online"></span> Online — Ready to help</span>
-                        </div>
-                    </div>
-                    <div class="chat-header-actions">
-                        <button class="chat-action-btn" title="Voice Call"><span>📞</span></button>
-                        <button class="chat-action-btn" title="Video Call"><span>📹</span></button>
-                        <button class="chat-action-btn" title="Screen Share"><span>🖥️</span></button>
-                    </div>
-                </div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="chat-welcome">
-                        <div class="welcome-icon">🚨</div>
-                        <h3>Welcome to CodeRescue AI</h3>
-                        <p>I'm your emergency developer assistant. Describe your issue or hit the panic button to get started.</p>
-                        <div class="welcome-suggestions">
-                            <button class="suggestion-chip" data-msg="I'm getting a TypeError in my React component">TypeError in React</button>
-                            <button class="suggestion-chip" data-msg="My API endpoint is returning 500 errors">API 500 Error</button>
-                            <button class="suggestion-chip" data-msg="I need help understanding async/await in JavaScript">Learn async/await</button>
-                            <button class="suggestion-chip" data-msg="My database queries are extremely slow">Slow DB Queries</button>
+                        <div class="chat-header-actions">
+                            <button class="chat-action-btn" title="Voice Call"><span>📞</span></button>
+                            <button class="chat-action-btn" title="Video Call"><span>📹</span></button>
+                            <button class="chat-action-btn" title="Screen Share"><span>🖥️</span></button>
                         </div>
                     </div>
-                </div>
-                <div class="chat-input-area">
-                    <div class="chat-input-wrapper glass-card-inner">
-                        <button class="attach-btn" title="Attach file">📎</button>
-                        <textarea class="chat-input" id="chatInput" placeholder="Describe your issue or paste an error..." rows="1"></textarea>
-                        <button class="send-btn" id="sendBtn" title="Send">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                            </svg>
-                        </button>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-welcome">
+                            <div class="welcome-icon">🚨</div>
+                            <h3>Welcome to CodeRescue AI</h3>
+                            <p>Describe your issue or hit the panic button to get started.</p>
+                            <div class="welcome-suggestions">
+                                <button class="suggestion-chip" data-msg="I'm getting a TypeError in my React component">TypeError in React</button>
+                                <button class="suggestion-chip" data-msg="My API endpoint is returning 500 errors">API 500 Error</button>
+                                <button class="suggestion-chip" data-msg="I need help understanding async/await in JavaScript">Learn async/await</button>
+                                <button class="suggestion-chip" data-msg="My database queries are extremely slow">Slow DB Queries</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-hints">
-                        <span>Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</span>
+                    <div class="chat-input-area">
+                        <div class="chat-input-wrapper glass-card-inner">
+                            <button class="attach-btn" title="Attach file">📎</button>
+                            <textarea class="chat-input" id="chatInput" placeholder="Describe your issue or paste an error..." rows="1"></textarea>
+                            <button class="send-btn" id="sendBtn" title="Send">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </div>
+                        <div class="input-hints"><span>Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</span></div>
                     </div>
                 </div>
             </div>
+
+            <!-- TAB: Dependency Danger Score -->
+            <div class="tab-panel" id="tab-dependency">
+                <div class="feature-panel glass-card">
+                    <div class="feature-panel-header">
+                        <div class="feature-panel-icon">📦</div>
+                        <div>
+                            <h2>Dependency Danger Score</h2>
+                            <p>Before you <code>npm install</code> anything — know exactly what you're getting into.</p>
+                        </div>
+                    </div>
+                    <div class="dep-input-row">
+                        <input type="text" id="depInput" class="feature-input" placeholder="Enter package name (e.g. moment, lodash, left-pad)...">
+                        <button class="btn btn-primary" id="depAnalyzeBtn">
+                            <span>🔍</span> Analyze
+                        </button>
+                    </div>
+                    <div class="dep-result" id="depResult" style="display:none;">
+                        <div class="danger-score-ring">
+                            <svg viewBox="0 0 120 120" class="ring-svg">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round"
+                                    id="dangerRingCircle"
+                                    stroke-dasharray="314"
+                                    stroke-dashoffset="314"
+                                    transform="rotate(-90 60 60)"/>
+                            </svg>
+                            <div class="danger-score-label">
+                                <span id="dangerScoreNum">0</span>
+                                <span>/100</span>
+                                <small id="dangerScoreVerdict">Safe</small>
+                            </div>
+                        </div>
+                        <div class="dep-metrics" id="depMetrics"></div>
+                    </div>
+                    <div class="dep-suggestions">
+                        <p class="dep-hint">Try these known risky packages:</p>
+                        <div class="dep-chips">
+                            <button class="suggestion-chip dep-chip" data-pkg="moment">moment</button>
+                            <button class="suggestion-chip dep-chip" data-pkg="left-pad">left-pad</button>
+                            <button class="suggestion-chip dep-chip" data-pkg="lodash">lodash</button>
+                            <button class="suggestion-chip dep-chip" data-pkg="request">request</button>
+                            <button class="suggestion-chip dep-chip" data-pkg="colors">colors</button>
+                            <button class="suggestion-chip dep-chip" data-pkg="faker">faker</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Error Ancestry Tree -->
+            <div class="tab-panel" id="tab-ancestry">
+                <div class="feature-panel glass-card">
+                    <div class="feature-panel-header">
+                        <div class="feature-panel-icon">🌳</div>
+                        <div>
+                            <h2>Error Ancestry Tree</h2>
+                            <p>Don't just fix the symptom. Find the original decision that made this error <em>inevitable</em>.</p>
+                        </div>
+                    </div>
+                    <div class="ancestry-input-row">
+                        <textarea id="ancestryInput" class="feature-input feature-textarea" placeholder="Paste your error / stack trace here...
+Example:
+TypeError: Cannot read properties of undefined (reading 'map')
+    at UserList (UserList.jsx:23)
+    at renderWithHooks (react-dom.js:14985)"></textarea>
+                        <button class="btn btn-primary" id="ancestryAnalyzeBtn"><span>🌳</span> Trace Ancestry</button>
+                    </div>
+                    <div class="ancestry-result" id="ancestryResult" style="display:none;">
+                        <div class="ancestry-tree" id="ancestryTree"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Context Capsule -->
+            <div class="tab-panel" id="tab-capsule">
+                <div class="feature-panel glass-card">
+                    <div class="feature-panel-header">
+                        <div class="feature-panel-icon">🧬</div>
+                        <div>
+                            <h2>Context Capsule</h2>
+                            <p>Wrap up a feature session. AI auto-generates a handoff doc so the next dev never starts blind.</p>
+                        </div>
+                    </div>
+                    <div class="capsule-form">
+                        <div class="capsule-field">
+                            <label>Feature / PR Name</label>
+                            <input type="text" id="capsuleFeature" class="feature-input" placeholder="e.g. User Authentication Refactor">
+                        </div>
+                        <div class="capsule-field">
+                            <label>What did you build? (brief)</label>
+                            <textarea id="capsuleWhat" class="feature-input feature-textarea-sm" placeholder="e.g. Replaced JWT with session-based auth, added refresh token logic..."></textarea>
+                        </div>
+                        <div class="capsule-field">
+                            <label>What did you try that FAILED?</label>
+                            <textarea id="capsuleFailed" class="feature-input feature-textarea-sm" placeholder="e.g. Tried OAuth2 but faced CORS issues with the current backend setup..."></textarea>
+                        </div>
+                        <div class="capsule-field">
+                            <label>What should the next dev know?</label>
+                            <textarea id="capsuleNextDev" class="feature-input feature-textarea-sm" placeholder="e.g. The token expiry is hardcoded in config.js line 47, needs env variable..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" id="capsuleGenerateBtn"><span>🧬</span> Generate Capsule</button>
+                    </div>
+                    <div class="capsule-result" id="capsuleResult" style="display:none;">
+                        <div class="capsule-output glass-card-inner" id="capsuleOutput"></div>
+                        <button class="btn btn-outline" id="capsuleCopyBtn">📋 Copy Capsule</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Quiet Mentor -->
+            <div class="tab-panel" id="tab-mentor">
+                <div class="feature-panel glass-card">
+                    <div class="feature-panel-header">
+                        <div class="feature-panel-icon">🦉</div>
+                        <div>
+                            <h2>The Quiet Mentor</h2>
+                            <p>Paste your session's code diff. AI reviews your session like a coach watching game tape — never interrupts, only debrief after.</p>
+                        </div>
+                    </div>
+                    <div class="mentor-input-row">
+                        <textarea id="mentorInput" class="feature-input feature-textarea" placeholder="Paste your code or diff from today's session...
+Example:
+- const data = fetchUser(id)
++ const data = await fetchUser(id)
++ if (!data) return null
+
+function processOrders(orders) {
+  orders.map(o => {
+    db.save(o)
+  })
+}"></textarea>
+                        <button class="btn btn-primary" id="mentorAnalyzeBtn"><span>🦉</span> Get Debrief</button>
+                    </div>
+                    <div class="mentor-result" id="mentorResult" style="display:none;">
+                        <div class="mentor-debrief" id="mentorDebrief"></div>
+                    </div>
+                    <div class="mentor-sessions glass-card-inner">
+                        <h4>📅 Past Debriefs</h4>
+                        <div id="mentorHistory">
+                            <div class="empty-state-small">No debriefs yet. Paste your first session above.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
-        <!-- Right Panel — Info & Knowledge -->
+        <!-- Right Panel -->
         <aside class="dash-info-panel">
-            <!-- Severity Quick View -->
             <div class="severity-quick glass-card">
                 <h4>Severity Levels</h4>
                 <div class="severity-mini-list">
-                    <div class="severity-mini p0-mini">
-                        <span class="severity-dot"></span>
-                        <span>P0 Critical</span>
-                        <span class="severity-time">&lt;60s</span>
-                    </div>
-                    <div class="severity-mini p1-mini">
-                        <span class="severity-dot"></span>
-                        <span>P1 High</span>
-                        <span class="severity-time">&lt;5min</span>
-                    </div>
-                    <div class="severity-mini p2-mini">
-                        <span class="severity-dot"></span>
-                        <span>P2 Medium</span>
-                        <span class="severity-time">&lt;15min</span>
-                    </div>
-                    <div class="severity-mini p3-mini">
-                        <span class="severity-dot"></span>
-                        <span>P3 Low</span>
-                        <span class="severity-time">Instant</span>
-                    </div>
-                    <div class="severity-mini p4-mini">
-                        <span class="severity-dot"></span>
-                        <span>P4 Learning</span>
-                        <span class="severity-time">Guided</span>
-                    </div>
+                    <div class="severity-mini p0-mini"><span class="severity-dot"></span><span>P0 Critical</span><span class="severity-time">&lt;60s</span></div>
+                    <div class="severity-mini p1-mini"><span class="severity-dot"></span><span>P1 High</span><span class="severity-time">&lt;5min</span></div>
+                    <div class="severity-mini p2-mini"><span class="severity-dot"></span><span>P2 Medium</span><span class="severity-time">&lt;15min</span></div>
+                    <div class="severity-mini p3-mini"><span class="severity-dot"></span><span>P3 Low</span><span class="severity-time">Instant</span></div>
+                    <div class="severity-mini p4-mini"><span class="severity-dot"></span><span>P4 Learning</span><span class="severity-time">Guided</span></div>
                 </div>
             </div>
 
-            <!-- Knowledge Base Preview -->
             <div class="kb-card glass-card">
                 <h4>📚 Knowledge Base</h4>
-                <div class="kb-search">
-                    <input type="text" placeholder="Search solutions..." class="kb-search-input">
-                </div>
+                <div class="kb-search"><input type="text" placeholder="Search solutions..." class="kb-search-input"></div>
                 <div class="kb-items">
-                    <div class="kb-item">
-                        <span class="kb-tag p3-tag">P3</span>
-                        <div>
-                            <p class="kb-title">Fix: React useEffect infinite loop</p>
-                            <span class="kb-meta">AI Resolved · 2 min ago</span>
-                        </div>
-                    </div>
-                    <div class="kb-item">
-                        <span class="kb-tag p2-tag">P2</span>
-                        <div>
-                            <p class="kb-title">Fix: CORS errors in Express.js</p>
-                            <span class="kb-meta">Expert Resolved · 15 min ago</span>
-                        </div>
-                    </div>
-                    <div class="kb-item">
-                        <span class="kb-tag p4-tag">P4</span>
-                        <div>
-                            <p class="kb-title">Guide: Understanding Promises</p>
-                            <span class="kb-meta">AI Tutor · 1 hr ago</span>
-                        </div>
-                    </div>
-                    <div class="kb-item">
-                        <span class="kb-tag p1-tag">P1</span>
-                        <div>
-                            <p class="kb-title">Fix: Memory leak in Node.js server</p>
-                            <span class="kb-meta">Expert Resolved · 3 hr ago</span>
-                        </div>
-                    </div>
+                    <div class="kb-item"><span class="kb-tag p3-tag">P3</span><div><p class="kb-title">Fix: React useEffect infinite loop</p><span class="kb-meta">AI Resolved · 2 min ago</span></div></div>
+                    <div class="kb-item"><span class="kb-tag p2-tag">P2</span><div><p class="kb-title">Fix: CORS errors in Express.js</p><span class="kb-meta">Expert Resolved · 15 min ago</span></div></div>
+                    <div class="kb-item"><span class="kb-tag p4-tag">P4</span><div><p class="kb-title">Guide: Understanding Promises</p><span class="kb-meta">AI Tutor · 1 hr ago</span></div></div>
+                    <div class="kb-item"><span class="kb-tag p1-tag">P1</span><div><p class="kb-title">Fix: Memory leak in Node.js server</p><span class="kb-meta">Expert Resolved · 3 hr ago</span></div></div>
                 </div>
             </div>
 
-            <!-- Real-time Activity -->
             <div class="activity-card glass-card">
                 <h4>🔴 Live Activity</h4>
                 <div class="activity-feed" id="activityFeed">
-                    <div class="activity-item">
-                        <span class="activity-dot"></span>
-                        <span>System initialized</span>
-                        <span class="activity-time">Just now</span>
-                    </div>
+                    <div class="activity-item"><span class="activity-dot"></span><span>System initialized</span><span class="activity-time">Just now</span></div>
                 </div>
             </div>
 
-            <!-- Language Selector -->
             <div class="language-card glass-card">
                 <h4>🌐 Language</h4>
                 <select class="language-select">
