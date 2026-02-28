@@ -1,6 +1,6 @@
 """
 CodeRescue AI — AWS Lambda Backend
-Connects all 8 features to Amazon Bedrock (Claude) for real AI responses.
+Connects all 8 features to Amazon Bedrock (Nova Micro) for real AI responses.
 Uses DynamoDB for incident tracking and session persistence.
 """
 
@@ -16,7 +16,7 @@ bedrock = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION
 dynamodb = boto3.resource("dynamodb", region_name=os.environ.get("AWS_REGION", "us-east-1"))
 
 TABLE_NAME = os.environ.get("TABLE_NAME", "CodeRescueIncidents")
-MODEL_ID = os.environ.get("MODEL_ID", "anthropic.claude-3-haiku-20240307-v1:0")
+MODEL_ID = os.environ.get("MODEL_ID", "apac.amazon.nova-micro-v1:0")
 
 
 # ── System Prompts per Feature ──
@@ -134,15 +134,16 @@ Questions should progressively narrow from broad understanding to specific debug
 
 
 def invoke_bedrock(system_prompt, user_message, max_tokens=2048):
-    """Call Amazon Bedrock with Claude model."""
+    """Call Amazon Bedrock with Nova Micro model."""
     body = {
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": max_tokens,
-        "system": system_prompt,
+        "system": [{"text": system_prompt}],
         "messages": [
-            {"role": "user", "content": user_message}
+            {"role": "user", "content": [{"text": user_message}]}
         ],
-        "temperature": 0.7,
+        "inferenceConfig": {
+            "maxTokens": max_tokens,
+            "temperature": 0.7,
+        },
     }
 
     response = bedrock.invoke_model(
@@ -153,7 +154,7 @@ def invoke_bedrock(system_prompt, user_message, max_tokens=2048):
     )
 
     result = json.loads(response["body"].read())
-    return result["content"][0]["text"]
+    return result["output"]["message"]["content"][0]["text"]
 
 
 def save_incident(incident_data):

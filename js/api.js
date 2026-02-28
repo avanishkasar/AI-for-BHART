@@ -5,10 +5,10 @@
    ============================================= */
 
 const API_CONFIG = {
-    // ⚡ REPLACE THIS with your actual API Gateway endpoint after deployment
-    endpoint: '', // e.g. 'https://abc123.execute-api.us-east-1.amazonaws.com/prod/api/rescue'
+    // ⚡ Live API Gateway endpoint (deployed via SAM)
+    endpoint: 'https://tcw1zetolh.execute-api.ap-south-1.amazonaws.com/prod/api/rescue',
     timeout: 15000, // 15 second timeout
-    enabled: false, // Set to true after deploying backend
+    enabled: true, // Backend is live on AWS
 };
 
 /**

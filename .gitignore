@@ -19,3 +19,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
+backend/.aws-sam/
+backend/*_test.json
+backend/output.json
+samconfig.toml
