@@ -1,8 +1,9 @@
 # CodeRescue AI - Problem Statement & Solution Overview
 
 **Track:** [Student Track] AI for Learning & Developer Productivity  
-**Team:** [Your Team Name]  
-**Date:** January 2026
+**Team:** DDoxers (Lead: Avanish Ravindra Kasar)  
+**Date:** February 2026  
+**Hackathon:** AI for Bharat 2026
 
 ---
 
@@ -280,37 +281,55 @@ Just like 911/112 systems:
 
 ---
 
-## 8. KEY FEATURES (HIGH-LEVEL)
+## 8. KEY FEATURES (IMPLEMENTED)
 
-### Feature 1: Emergency Triage System
-**What:** Automatic severity classification (P0-P4)  
-**How:** AI analyzes code, errors, sentiment, and context  
-**Why:** Ensures critical issues get immediate attention  
-**Impact:** 10x faster response than traditional support
+### Feature 1: Emergency Chat with AI Triage
+**What:** Real-time chat with automatic severity classification (P0-P4)  
+**How:** Amazon Bedrock (Claude 3 Haiku) analyzes code context and errors  
+**Why:** Ensures critical issues get immediate, context-aware responses  
+**Impact:** Instant AI-powered debugging assistance
 
-### Feature 2: AI Response Bot
-**What:** Handles 60-70% of questions automatically  
-**How:** GPT-4 + knowledge base + interactive debugging  
-**Why:** Scales support without human bottleneck  
-**Impact:** 60% cost reduction, instant help
+### Feature 2: Dependency Danger Score
+**What:** Analyzes project dependencies and assigns risk scores  
+**How:** AI evaluates package age, maintenance status, known vulnerabilities  
+**Why:** Prevents production incidents from risky dependencies  
+**Impact:** Proactive risk identification before issues occur
 
-### Feature 3: Multi-Modal Communication
-**What:** Voice, video, screen share, code collaboration  
-**How:** Twilio + WebRTC + real-time transcription  
-**Why:** Different problems need different communication  
-**Impact:** Solve problems 40% faster
+### Feature 3: Error Ancestry Tree
+**What:** Visual trace of error propagation through the codebase  
+**How:** AI builds a tree showing root cause → cascading failures  
+**Why:** Understanding error chains leads to faster root cause analysis  
+**Impact:** Reduces debugging time by showing the full error lineage
 
-### Feature 4: Knowledge Preservation
-**What:** Every interaction auto-documented  
-**How:** AI extracts solutions, tags, and indexes  
-**Why:** Institutional knowledge never lost  
-**Impact:** 50% reduction in repeat questions
+### Feature 4: Context Capsule
+**What:** One-click snapshot of current debugging context  
+**How:** Captures code, errors, environment, and AI-generated summary  
+**Why:** Preserves institutional knowledge for team sharing  
+**Impact:** Eliminates knowledge loss and repeat debugging
 
-### Feature 5: Global Accessibility
-**What:** 10+ languages with real-time translation  
-**How:** AssemblyAI + ElevenLabs + Sarvam AI  
-**Why:** Make coding accessible worldwide  
-**Impact:** Reach 27M developers globally
+### Feature 5: Quiet Mentor
+**What:** Non-intrusive AI mentor that guides without giving direct answers  
+**How:** Socratic questioning approach via Amazon Bedrock  
+**Why:** Builds developer problem-solving skills, not dependency  
+**Impact:** Long-term learning improvement for students and juniors
+
+### Feature 6: Commit Risk Predictor
+**What:** Analyzes code changes and predicts risk of introducing bugs  
+**How:** AI evaluates diff complexity, affected areas, test coverage  
+**Why:** Catches risky commits before they reach production  
+**Impact:** Reduces post-deployment incidents
+
+### Feature 7: Post-Mortem Generator
+**What:** Auto-generates structured incident post-mortems  
+**How:** AI creates timeline, root cause analysis, and action items  
+**Why:** Standardizes incident documentation across teams  
+**Impact:** Consistent, thorough post-mortems in minutes not hours
+
+### Feature 8: Rubber Duck Mode
+**What:** Interactive AI rubber duck debugging companion  
+**How:** AI asks probing questions that lead developers to discover bugs themselves  
+**Why:** Rubber duck debugging is proven effective but requires a listener  
+**Impact:** Developers solve their own problems through structured thinking
 
 ---
 
@@ -320,83 +339,82 @@ Just like 911/112 systems:
 
 ```
 ┌─────────────────────────────────────────┐
-│         USER INTERFACES                  │
-│  Web | IDE Extensions | Mobile | Voice  │
+│         FRONTEND (GitHub Pages)          │
+│  HTML5 | CSS3 | Vanilla JavaScript      │
+│  Landing Page | Interactive Dashboard   │
+└──────────────┬──────────────────────────┘
+               │ HTTPS REST API
+┌──────────────▼──────────────────────────┐
+│      AWS API GATEWAY (REST)             │
+│  CORS | Throttling | Request Routing    │
 └──────────────┬──────────────────────────┘
                │
 ┌──────────────▼──────────────────────────┐
-│         API GATEWAY                      │
-│  Load Balancing | Auth | Rate Limiting  │
-└──────────────┬──────────────────────────┘
-               │
-       ┌───────┼───────┬───────────┐
-       │       │       │           │
-       ▼       ▼       ▼           ▼
-┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│   CORE   │ │   AI   │ │  COMMS │ │  DATA  │
-│ SERVICES │ │ ENGINE │ │ LAYER  │ │ LAYER  │
-└──────────┘ └────────┘ └────────┘ └────────┘
+│      AWS LAMBDA (Python 3.12)           │
+│  Feature Router | Prompt Engineering    │
+│  Response Parsing | Error Handling      │
+└──────┬───────────────────┬──────────────┘
+       │                   │
+       ▼                   ▼
+┌──────────────┐   ┌──────────────┐
+│  AMAZON      │   │  AMAZON      │
+│  BEDROCK     │   │  DYNAMODB    │
+│  Claude 3    │   │  Incidents   │
+│  Haiku       │   │  Table       │
+└──────────────┘   └──────────────┘
 ```
 
 ### Component Interaction
 
-**1. User Interface Layer**
-- Web app (React)
-- IDE extensions (VS Code, IntelliJ)
-- Mobile app (React Native)
-- Voice interface (Twilio)
+**1. Frontend Layer (Static Site)**
+- Landing page (`index.html`) — project overview, feature showcase
+- Dashboard (`dashboard.html`) — 8 interactive feature tabs
+- Glassmorphism UI with CSS custom properties
+- API integration layer (`api.js`) with graceful fallback to hardcoded responses
 
-**2. API Gateway**
-- Routes requests
-- Handles authentication
-- Rate limiting
-- Load balancing
+**2. AWS API Gateway**
+- REST API endpoint for all 8 features
+- CORS enabled for cross-origin requests
+- Routes feature-specific requests to Lambda
 
-**3. Core Services**
-- User management
-- Incident management
-- Expert matching
-- Analytics engine
+**3. AWS Lambda (Serverless Compute)**
+- Single Python 3.12 function handling all features
+- Routes by `feature` parameter to appropriate system prompt
+- Parses structured JSON responses for 5 features
+- Logs all incidents to DynamoDB with TTL
 
-**4. AI Engine**
-- Triage classifier
-- NLP analysis
-- Code analyzer
-- Response generator
-- Transcription service
+**4. Amazon Bedrock (Generative AI)**
+- Model: `anthropic.claude-3-haiku-20240307-v1:0`
+- 8 specialized system prompts (one per feature)
+- Structured output parsing for dependency scores, ancestry trees, etc.
+- Temperature and token limits tuned per feature
 
-**5. Communication Layer**
-- Voice calls (Twilio)
-- Video/screen share (WebRTC)
-- Real-time messaging (Socket.io)
-- Transcription (AssemblyAI)
-
-**6. Data Layer**
-- PostgreSQL (users, incidents)
-- MongoDB (transcripts, logs)
-- Redis (cache, queues)
-- Pinecone (semantic search)
+**5. Amazon DynamoDB (Data Layer)**
+- `CodeRescue-Incidents` table
+- Stores feature usage, inputs, AI responses
+- PAY_PER_REQUEST billing (cost-efficient)
+- TTL-based auto-expiry for old records
 
 ### Data Flow Example
 
 ```
-Developer → IDE Extension → API Gateway
+Developer → Dashboard UI → Select Feature Tab
     ↓
-Context Capture (code, errors, env)
+Enter Input (code, error, dependency name, etc.)
     ↓
-AI Triage Engine → Severity: P1
+api.js → callRescueAPI(feature, input)
     ↓
-Expert Matching → Best Available Expert
+API Gateway → Lambda Function
     ↓
-Notification → Expert Dashboard
+Lambda → Bedrock (Claude 3 Haiku) with system prompt
     ↓
-Voice Call Initiated → Twilio
+AI Response → Lambda parses structured output
     ↓
-Real-time Transcription → AssemblyAI
+Lambda → DynamoDB (log incident)
     ↓
-Problem Solved → Solution Documented
+JSON Response → Frontend renders result
     ↓
-Knowledge Base Updated → Searchable
+(If API unavailable → Hardcoded fallback response)
 ```
 
 ---
@@ -404,101 +422,65 @@ Knowledge Base Updated → Searchable
 ## 10. TECHNOLOGIES USED
 
 ### Frontend Technologies
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool
-- **Chakra UI** - Component library
-- **VS Code Extension API** - IDE integration
-- **IntelliJ Platform SDK** - IDE plugin
+- **HTML5** - Semantic markup, accessibility
+- **CSS3** - Glassmorphism design, CSS Grid, Flexbox, custom properties, keyframe animations
+- **Vanilla JavaScript (ES6+)** - Async/await, DOM manipulation, modular architecture
+- **Google Fonts** - Inter (UI text) + JetBrains Mono (code blocks)
 
-### Backend Technologies
-- **FastAPI (Python 3.11+)** - Main API server
-- **Node.js** - WebSocket server
-- **PostgreSQL 15** - Relational database
-- **MongoDB 6** - Document storage
-- **Redis 7** - Caching and queues
-- **Pinecone** - Vector database
+### AWS Backend (Serverless)
+- **AWS Lambda** - Python 3.12 serverless compute
+- **Amazon Bedrock** - Generative AI (Claude 3 Haiku model)
+- **Amazon API Gateway** - REST API with CORS
+- **Amazon DynamoDB** - NoSQL incident logging with TTL
+- **AWS SAM** - Infrastructure as Code (CloudFormation)
 
-### AI/ML Services
-- **OpenAI GPT-4 Turbo** - Problem solving
-- **Google Gemini Pro** - Multi-modal understanding
-- **Groq AI** - Fast inference
-- **HuggingFace Transformers** - NER, classification
-- **AssemblyAI** - Real-time transcription
-- **Deepgram** - Backup transcription
-- **ElevenLabs** - Text-to-speech
-- **Sarvam AI** - Indian languages
-
-### Communication Services
-- **Twilio Programmable Voice** - Phone calls
-- **Twilio Video** - Screen sharing
-- **WebRTC** - Peer-to-peer connections
-- **Socket.io** - Real-time messaging
-
-### Infrastructure
-- **Docker** - Containerization
-- **Kubernetes** - Orchestration
-- **AWS/GCP** - Cloud infrastructure
-- **Cloudflare** - CDN and security
-- **GitHub Actions** - CI/CD
-- **Prometheus + Grafana** - Monitoring
+### Development & Deployment
+- **GitHub** - Version control and collaboration
+- **GitHub Pages** - Static site hosting
+- **AWS SAM CLI** - Local testing and cloud deployment
+- **Python 3.12** - Backend runtime
+- **Node.js** - Development tooling
 
 ---
 
 ## 11. ESTIMATED IMPLEMENTATION COST
 
-### Development Phase (6 Months): $566,500
+### Hackathon Prototype (Current Build)
 
-**Team Costs: $438,000**
-- Technical Lead: $90,000
-- Backend Engineer: $72,000
-- Frontend Engineer: $72,000
-- AI/ML Engineer: $78,000
-- DevOps Engineer: $66,000
-- Product Manager: $60,000
+**Development:** Built by Team DDoxers in hackathon timeframe
+- Frontend: HTML5/CSS3/JavaScript (~5,000 lines)
+- Backend: AWS Lambda + SAM template (~300 lines Python)
+- Total: ~5,300 lines of code
 
-**Infrastructure & Services: $39,000**
-- Cloud infrastructure: $12,000
-- AI/ML APIs: $18,000
-- Communication services: $6,000
-- Development tools: $3,000
+**AWS Costs (Pay-Per-Use):**
+- Lambda: Free tier covers 1M requests/month
+- API Gateway: Free tier covers 1M API calls/month
+- DynamoDB: Free tier covers 25GB storage + 25 RCU/WCU
+- Bedrock (Claude 3 Haiku): ~$0.00025/1K input tokens, ~$0.00125/1K output tokens
+- **Estimated monthly cost for demo usage: < $5/month**
 
-**Other Costs: $89,500**
-- Legal & compliance: $15,000
-- Design & UX: $10,000
-- Testing & QA: $8,000
-- Marketing materials: $5,000
-- Contingency (10%): $51,500
+### Production Scale (10K Users)
 
-### Monthly Operating Cost: $60,100
+**Monthly Infrastructure: ~$150-300/month**
+- Lambda invocations: ~$20/month
+- API Gateway: ~$35/month
+- DynamoDB: ~$25/month
+- Bedrock API calls: ~$100-200/month
+- GitHub Pages hosting: Free
 
-**Infrastructure (10K users): $6,100**
-- Cloud services: $1,500
-- Database services: $800
-- AI/ML APIs: $2,500
-- Communication: $1,000
-- Monitoring: $300
+**Cost Per User Economics:**
+- Infrastructure: ~$0.02/user/month
+- AI API costs: ~$0.01/user/month
+- **Total: ~$0.03/user/month** (serverless scales efficiently)
 
-**Team (Maintenance): $54,000**
-- Engineering (3): $36,000
-- Support (2): $10,000
-- Marketing (1): $8,000
-
-### Cost Per User Economics
-- Infrastructure: $0.61/user/month
-- AI services: $0.25/user/month
-- Support: $0.10/user/month
-- **Total cost: $0.96/user/month**
-- **Revenue: $1.50/user/month** (15% conversion at $10)
-- **Gross margin: 36%** (improving to 60%+ at scale)
-
-### ROI Projection
-- Year 1 ARR: $540,000
-- Break-even: Month 10
-- Path to $10M ARR in 3 years
+### Why Serverless?
+- Zero idle costs — pay only when features are used
+- Auto-scales from 1 to 10,000+ users without configuration
+- No server maintenance or DevOps overhead
+- AWS Free Tier covers initial growth phase
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** January 2026  
-**Status:** Ready for Submission
+**Document Version:** 2.0  
+**Last Updated:** February 2026  
+**Status:** Ready for Submission — AI for Bharat 2026 Hackathon
