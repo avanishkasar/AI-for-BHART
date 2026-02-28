@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initAncestryTree();
     initContextCapsule();
     initQuietMentor();
+    initCommitRisk();
+    initPostMortem();
+    initRubberDuck();
+    initChatHeaderActions();
+    initKBSearch();
+    initLanguageSelector();
 });
 
 /* ── State ── */
@@ -271,9 +277,11 @@ function generateAIResponse(userMessage) {
 
 /* ── Suggestion Chips ── */
 function initSuggestionChips() {
-    document.querySelectorAll('.suggestion-chip').forEach(chip => {
+    // Only target chat suggestion chips (those with data-msg), not dep/cr/duck chips
+    document.querySelectorAll('.welcome-suggestions .suggestion-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             const msg = chip.dataset.msg;
+            if (!msg) return;
             const input = document.getElementById('chatInput');
             input.value = msg;
             sendMessage();
@@ -940,4 +948,644 @@ function generateMentorDebrief(code) {
 
     addActivity(`🦉 Mentor debrief done — ${Math.min(insights.length, 3)} insights across ${lines} lines`);
 }
+
+/* ==============================================
+   COMMIT RISK PREDICTOR
+   ============================================== */
+
+const commitRiskDemos = {
+    'sql-injection': `- db.query(\`SELECT * FROM users WHERE id = ?\`, [id]);
++ db.query('DELETE FROM users WHERE id=' + req.params.id);
++ db.query('SELECT * FROM secrets WHERE role=' + req.body.role);
+
+  app.post('/api/admin', (req, res) => {
+-   if (req.user.isAdmin) {
++   // auth check removed for testing
+      return res.json(adminData);
+-   }
+  });`,
+    'auth-bypass': `  function checkPermission(user, resource) {
+-   if (user.role !== 'admin' && !user.permissions.includes(resource)) {
+-     throw new ForbiddenError('Access denied');
+-   }
++   // TODO: re-enable after demo
++   return true;
+  }
+
+- const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
++ const token = jwt.sign(payload, 'secret123', { expiresIn: '30d' });
+
++ app.get('/api/debug/users', (req, res) => {
++   res.json(allUsers);  // includes passwords
++ });`,
+    'perf-regression': `- const BATCH_SIZE = 100;
++ const BATCH_SIZE = 10000;
+
+- const cache = new LRU({ max: 500, ttl: 60000 });
++ // const cache = new LRU({ max: 500, ttl: 60000 });
+
+  async function processOrders(orders) {
+-   const batches = chunk(orders, BATCH_SIZE);
+-   for (const batch of batches) {
+-     await Promise.all(batch.map(o => saveOrder(o)));
+-   }
++   for (const order of orders) {
++     await saveOrder(order);
++     await sleep(10);
++   }
+  }
+
++ app.get('/api/reports', async (req, res) => {
++   const all = await db.query('SELECT * FROM transactions');
++   res.json(all); // could be millions of rows
++ });`
+};
+
+function initCommitRisk() {
+    document.getElementById('commitriskAnalyzeBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('commitriskInput').value.trim();
+        if (!input) { showToast('Paste a diff first'); return; }
+        analyzeCommitRisk(input);
+    });
+
+    document.querySelectorAll('.cr-demo-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const demo = commitRiskDemos[chip.dataset.demo];
+            if (demo) {
+                document.getElementById('commitriskInput').value = demo;
+                analyzeCommitRisk(demo);
+            }
+        });
+    });
+}
+
+function analyzeCommitRisk(diff) {
+    const lower = diff.toLowerCase();
+    const result = document.getElementById('commitriskResult');
+    result.style.display = 'flex';
+
+    const warnings = [];
+    let score = 5; // base risk
+
+    // SQL Injection
+    if (lower.includes('+ ') && (lower.includes("req.params") || lower.includes("req.body") || lower.includes("req.query")) && (lower.includes("query(") || lower.includes("exec("))) {
+        if (lower.includes("'+") || lower.includes("\" +") || lower.includes('+ req.')) {
+            warnings.push({ severity: 'critical', icon: '💉', title: 'SQL Injection Vulnerability', text: 'String concatenation used in database queries with user input. An attacker can inject arbitrary SQL. Use parameterized queries or ORM methods.', line: 'Detected: string concatenation in db.query()' });
+            score += 35;
+        }
+    }
+
+    // Auth bypass
+    if ((lower.includes('- ') && lower.includes('if') && (lower.includes('admin') || lower.includes('auth') || lower.includes('permission') || lower.includes('role'))) ||
+        (lower.includes('//') && (lower.includes('auth') || lower.includes('check') || lower.includes('permission')) && (lower.includes('removed') || lower.includes('disabled') || lower.includes('todo') || lower.includes('testing')))) {
+        warnings.push({ severity: 'critical', icon: '🔓', title: 'Authentication/Authorization Bypass', text: 'Security check was removed or commented out. Any user can now access protected resources. Never disable auth checks — use feature flags or test-specific middleware instead.', line: 'Detected: security check removed or commented' });
+        score += 30;
+    }
+
+    // Hardcoded secrets
+    if (lower.includes("'secret") || lower.includes('"secret') || (lower.includes('password') && lower.includes("'")) || lower.includes('api_key') || lower.includes('apikey')) {
+        warnings.push({ severity: 'critical', icon: '🔑', title: 'Hardcoded Secret/Credential', text: 'Credentials or API keys are hardcoded in source code. These will be visible in version control. Use environment variables or a secrets manager (AWS Secrets Manager, Vault).', line: 'Detected: secret/password in source' });
+        score += 25;
+    }
+
+    // Debug endpoints
+    if (lower.includes('debug') && (lower.includes('/api') || lower.includes('app.get') || lower.includes('app.post'))) {
+        warnings.push({ severity: 'high', icon: '🐛', title: 'Debug Endpoint Left in Code', text: 'A debug/diagnostic endpoint is being added. If this reaches production, it could expose internal data or allow unauthorized actions. Gate behind NODE_ENV check at minimum.', line: 'Detected: debug route exposed' });
+        score += 15;
+    }
+
+    // Commented-out code
+    const commentedLines = (diff.match(/^\+\s*\/\//gm) || []).length;
+    if (commentedLines >= 2) {
+        warnings.push({ severity: 'medium', icon: '💬', title: `${commentedLines} Lines of Commented-Out Code`, text: 'Commented-out code clutters the codebase and creates confusion about what\'s active. If the code is being removed, delete it — git history preserves it. If it\'s temporary, track it in an issue.', line: `${commentedLines} commented lines detected` });
+        score += 8;
+    }
+
+    // Performance: removed caching
+    if (lower.includes('- ') && (lower.includes('cache') || lower.includes('lru') || lower.includes('redis') || lower.includes('memo'))) {
+        warnings.push({ severity: 'high', icon: '🐌', title: 'Caching Layer Removed', text: 'A cache or memoization layer was removed. This can cause N+1 queries or repeated expensive computations under high traffic. Verify that the cache was actually unused before removing.', line: 'Detected: cache/memoization removed' });
+        score += 18;
+    }
+
+    // SELECT *
+    if (lower.includes('select *') && (lower.includes('transactions') || lower.includes('users') || lower.includes('orders') || lower.includes('logs'))) {
+        warnings.push({ severity: 'high', icon: '📊', title: 'Unbounded SELECT * on Large Table', text: 'A SELECT * without LIMIT on what could be a high-volume table. In production this can return millions of rows, causing OOM crashes and network saturation. Add pagination (LIMIT/OFFSET) and select only needed columns.', line: 'Detected: SELECT * without LIMIT' });
+        score += 15;
+    }
+
+    // Batch size change
+    if (lower.includes('batch_size') || lower.includes('batchsize')) {
+        const numMatch = diff.match(/\+.*?(\d{4,})/);
+        if (numMatch) {
+            warnings.push({ severity: 'medium', icon: '📦', title: 'Batch Size Increased Significantly', text: `Batch size was increased to ${numMatch[1]}. Large batches can cause memory spikes, database timeouts, and slow rollbacks. Load-test with production-scale data before merging.`, line: `New batch size: ${numMatch[1]}` });
+            score += 10;
+        }
+    }
+
+    // Sequential awaits (perf)
+    if (lower.includes('for (') && lower.includes('await ') && !lower.includes('promise.all')) {
+        warnings.push({ severity: 'medium', icon: '🔄', title: 'Sequential Awaits in Loop', text: 'Awaiting inside a loop runs operations one-at-a-time. If operations are independent, use Promise.all() with batching for parallel execution — can be 10-50x faster.', line: 'Detected: await inside for loop' });
+        score += 10;
+    }
+
+    // Token expiry too long
+    const expiryMatch = diff.match(/expiresIn:\s*['"](\d+)d['"]/);
+    if (expiryMatch && parseInt(expiryMatch[1]) > 7) {
+        warnings.push({ severity: 'medium', icon: '⏰', title: `Token Expiry: ${expiryMatch[1]} Days`, text: `JWT tokens set to expire in ${expiryMatch[1]} days. If a token is compromised, the attacker has a long window. Use short-lived access tokens (15min-1hr) with refresh token rotation.`, line: `expiresIn: ${expiryMatch[1]}d` });
+        score += 12;
+    }
+
+    // DELETE without WHERE
+    if (lower.includes('delete from') && !lower.includes('where')) {
+        warnings.push({ severity: 'critical', icon: '🗑️', title: 'DELETE Without WHERE Clause', text: 'This query will delete ALL rows in the table. If this reaches production, you lose all data in that table. Always include a WHERE clause and test with LIMIT first.', line: 'Detected: DELETE FROM without WHERE' });
+        score += 30;
+    }
+
+    // No warnings = clean diff
+    if (warnings.length === 0) {
+        warnings.push({ severity: 'low', icon: '✅', title: 'No Major Issues Detected', text: 'This diff looks clean. No obvious security, performance, or reliability issues found. Standard code review still recommended — automated analysis only catches known patterns.', line: null });
+    }
+
+    score = Math.min(score, 98);
+
+    // Render score
+    const scoreColor = score >= 75 ? '#ff3b5c' : score >= 50 ? '#ff9100' : score >= 25 ? '#ffcc00' : '#00e676';
+    const verdict = score >= 75 ? '🚫 DO NOT MERGE' : score >= 50 ? '⚠️ HIGH RISK' : score >= 25 ? '⚡ CAUTION' : '✅ SAFE TO MERGE';
+    const verdictBg = score >= 75 ? 'rgba(255,59,92,0.15)' : score >= 50 ? 'rgba(255,145,0,0.15)' : score >= 25 ? 'rgba(255,204,0,0.12)' : 'rgba(0,230,118,0.12)';
+
+    document.getElementById('commitriskScoreNum').textContent = score;
+    document.getElementById('commitriskScoreNum').style.color = scoreColor;
+    const verdictEl = document.getElementById('commitriskVerdict');
+    verdictEl.textContent = verdict;
+    verdictEl.style.color = scoreColor;
+    verdictEl.style.background = verdictBg;
+
+    // Animate meter
+    const meterFill = document.getElementById('commitriskMeterFill');
+    meterFill.style.setProperty('--reveal', (100 - score) + '%');
+    setTimeout(() => { meterFill.style.cssText = `position:relative;overflow:hidden;height:12px;border-radius:6px;background:linear-gradient(90deg,#00e676 0%,#ffcc00 35%,#ff9100 60%,#ff3b5c 85%,#d50000 100%);`; meterFill.innerHTML = `<div style="position:absolute;top:0;right:0;height:100%;width:${100-score}%;background:rgba(10,10,15,0.85);border-radius:0 6px 6px 0;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);"></div>`; }, 50);
+
+    // Render warnings
+    const warningsEl = document.getElementById('commitriskWarnings');
+    warningsEl.innerHTML = '';
+    warnings.forEach((w, i) => {
+        const el = document.createElement('div');
+        el.className = `cr-warning ${w.severity}`;
+        el.style.animationDelay = (i * 0.12) + 's';
+        el.innerHTML = `
+            <div class="cr-warning-icon">${w.icon}</div>
+            <div class="cr-warning-body">
+                <div class="cr-warning-title">${w.title}</div>
+                <div class="cr-warning-text">${w.text}</div>
+                ${w.line ? `<div class="cr-warning-line">📍 ${w.line}</div>` : ''}
+            </div>`;
+        warningsEl.appendChild(el);
+    });
+
+    // Summary
+    const critCount = warnings.filter(w => w.severity === 'critical').length;
+    const highCount = warnings.filter(w => w.severity === 'high').length;
+    document.getElementById('commitriskSummary').innerHTML = `
+        <strong>📊 Risk Summary:</strong> ${warnings.length} issue${warnings.length !== 1 ? 's' : ''} found
+        ${critCount ? ` · <span style="color:var(--p0-color)">${critCount} critical</span>` : ''}
+        ${highCount ? ` · <span style="color:var(--p1-color)">${highCount} high</span>` : ''}
+        <br><br>
+        <strong>💡 Recommendation:</strong> ${score >= 50 ? 'This commit needs security review before merging. Address critical issues first, then re-run analysis.' : 'Low risk. Proceed with standard code review processes.'}
+    `;
+
+    addActivity(`⚡ Commit risk analyzed — Score: ${score}/100 (${warnings.length} issues)`);
+}
+
+/* ==============================================
+   INCIDENT POST-MORTEM GENERATOR
+   ============================================== */
+
+function initPostMortem() {
+    document.getElementById('pmGenerateBtn')?.addEventListener('click', generatePostMortem);
+    document.getElementById('pmCopyBtn')?.addEventListener('click', () => {
+        const output = document.getElementById('pmOutput');
+        if (output) {
+            navigator.clipboard.writeText(output.innerText).then(() => {
+                showToast('Post-Mortem copied to clipboard! 📋');
+            });
+        }
+    });
+    document.getElementById('pmDownloadBtn')?.addEventListener('click', downloadPostMortem);
+}
+
+function generatePostMortem() {
+    const whatBroke  = document.getElementById('pmWhatBroke').value.trim();
+    const when       = document.getElementById('pmWhen').value.trim() || 'Not specified';
+    const duration   = document.getElementById('pmDuration').value.trim() || 'Unknown';
+    const rootCause  = document.getElementById('pmRootCause').value.trim();
+    const fix        = document.getElementById('pmFix').value.trim();
+    const impact     = document.getElementById('pmImpact').value.trim() || 'Under assessment';
+
+    if (!whatBroke) { showToast('Describe what broke first'); return; }
+    if (!rootCause) { showToast('What was the root cause?'); return; }
+
+    const result = document.getElementById('pmResult');
+    const output = document.getElementById('pmOutput');
+    result.style.display = 'flex';
+
+    const severity = determinePMSeverity(whatBroke, impact);
+    const sevColor = { 'SEV-1': 'var(--p0-color)', 'SEV-2': 'var(--p1-color)', 'SEV-3': 'var(--p2-color)' }[severity] || 'var(--p2-color)';
+    const sevBg = { 'SEV-1': 'rgba(255,23,68,0.12)', 'SEV-2': 'rgba(255,109,0,0.12)', 'SEV-3': 'rgba(255,214,0,0.1)' }[severity] || 'rgba(255,214,0,0.1)';
+    const timestamp = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const timeline = generateTimeline(when, duration);
+    const actionItems = generateActionItems(rootCause, fix, whatBroke);
+    const lessons = generateLessons(rootCause, whatBroke);
+
+    output.innerHTML = `
+        <h3>📋 INCIDENT POST-MORTEM</h3>
+        <div style="text-align:center;">
+            <div class="pm-severity-badge" style="color:${sevColor};background:${sevBg};">${severity} — ${whatBroke.substring(0, 60)}</div>
+        </div>
+
+        <div class="pm-section">
+            <div class="pm-section-title">📌 Executive Summary</div>
+            <div class="pm-section-content">
+                On <strong>${when}</strong>, an incident occurred affecting ${impact}. The outage lasted approximately <strong>${duration}</strong>. Root cause was identified as: ${rootCause.substring(0, 200)}. ${fix ? 'The issue was resolved by: ' + fix.substring(0, 150) + '.' : 'Mitigation is in progress.'}
+            </div>
+        </div>
+
+        <div class="pm-section">
+            <div class="pm-section-title">🕐 Timeline</div>
+            <div class="pm-section-content">
+                ${timeline}
+            </div>
+        </div>
+
+        <div class="pm-section">
+            <div class="pm-section-title">🔍 Root Cause Analysis</div>
+            <div class="pm-section-content">
+                <strong>Primary cause:</strong> ${rootCause}<br><br>
+                <strong>Contributing factors:</strong><br>
+                ${generateContributingFactors(rootCause, whatBroke)}
+            </div>
+        </div>
+
+        <div class="pm-section">
+            <div class="pm-section-title">💊 Resolution</div>
+            <div class="pm-section-content">
+                ${fix || 'Resolution details pending. Update this section once the fix is fully deployed and verified.'}
+            </div>
+        </div>
+
+        <div class="pm-section">
+            <div class="pm-section-title">💥 Impact</div>
+            <div class="pm-section-content">
+                <strong>Users affected:</strong> ${impact}<br>
+                <strong>Duration:</strong> ${duration}<br>
+                <strong>Services impacted:</strong> ${extractServices(whatBroke)}
+            </div>
+        </div>
+
+        <div class="pm-section">
+            <div class="pm-section-title">✅ Action Items</div>
+            <div class="pm-section-content">
+                ${actionItems}
+            </div>
+        </div>
+
+        <div class="pm-section">
+            <div class="pm-section-title">📚 Lessons Learned</div>
+            <div class="pm-section-content">
+                ${lessons}
+            </div>
+        </div>
+
+        <div style="text-align:center;padding-top:16px;border-top:1px solid var(--glass-border);font-size:0.75rem;color:var(--text-muted);">
+            Generated by CodeRescue AI · ${timestamp} · Document ID: PM-${Date.now().toString(36).toUpperCase()}
+        </div>
+    `;
+
+    addActivity(`📋 Post-Mortem generated: ${severity} — ${whatBroke.substring(0, 40)}`);
+}
+
+function determinePMSeverity(whatBroke, impact) {
+    const lower = (whatBroke + ' ' + impact).toLowerCase();
+    if (lower.includes('down') || lower.includes('outage') || lower.includes('all users') || lower.includes('production') || lower.includes('revenue')) return 'SEV-1';
+    if (lower.includes('500') || lower.includes('error') || lower.includes('fail') || lower.includes('slow') || lower.includes('breach')) return 'SEV-2';
+    return 'SEV-3';
+}
+
+function generateTimeline(when, duration) {
+    const times = [
+        { time: when || 'T+0:00', event: 'Incident detected — monitoring alert triggered' },
+        { time: 'T+0:05', event: 'On-call engineer acknowledged alert and began investigation' },
+        { time: 'T+0:12', event: 'Root cause identified — began working on fix' },
+        { time: 'T+0:25', event: 'Fix deployed to staging — verification started' },
+        { time: `T+${duration || '0:45'}`, event: 'Fix deployed to production — service restored' },
+        { time: 'Post-incident', event: 'Monitoring confirmed full recovery — post-mortem scheduled' },
+    ];
+    return times.map(t => `<div class="pm-timeline-item"><span class="pm-timeline-time">${t.time}</span><span class="pm-timeline-event">${t.event}</span></div>`).join('');
+}
+
+function generateContributingFactors(rootCause, whatBroke) {
+    const lower = (rootCause + ' ' + whatBroke).toLowerCase();
+    const factors = [];
+    if (lower.includes('migration') || lower.includes('deploy') || lower.includes('release')) factors.push('Deployment process did not include sufficient pre-production validation');
+    if (lower.includes('database') || lower.includes('db') || lower.includes('query') || lower.includes('index')) factors.push('Database changes were not load-tested with production-scale data');
+    if (lower.includes('config') || lower.includes('env') || lower.includes('variable')) factors.push('Configuration management lacked proper environment-specific validation');
+    factors.push('Monitoring did not catch the degradation early enough to prevent user impact');
+    factors.push('Runbook for this failure mode did not exist or was outdated');
+    return factors.map(f => `• ${f}`).join('<br>');
+}
+
+function extractServices(whatBroke) {
+    const lower = whatBroke.toLowerCase();
+    const services = [];
+    if (lower.includes('api') || lower.includes('endpoint')) services.push('API Gateway');
+    if (lower.includes('payment') || lower.includes('billing') || lower.includes('stripe')) services.push('Payment Service');
+    if (lower.includes('auth') || lower.includes('login') || lower.includes('sso')) services.push('Authentication Service');
+    if (lower.includes('database') || lower.includes('db') || lower.includes('query')) services.push('Database Layer');
+    if (lower.includes('frontend') || lower.includes('ui') || lower.includes('web')) services.push('Web Frontend');
+    if (services.length === 0) services.push('Core application service');
+    return services.join(', ');
+}
+
+function generateActionItems(rootCause, fix, whatBroke) {
+    const lower = (rootCause + ' ' + fix + ' ' + whatBroke).toLowerCase();
+    const items = [];
+    items.push({ priority: 'P0', text: 'Verify fix is stable in production with extended monitoring period (48 hours)' });
+    if (lower.includes('migration') || lower.includes('database') || lower.includes('index')) {
+        items.push({ priority: 'P0', text: 'Add database migration dry-run step to CI/CD pipeline' });
+        items.push({ priority: 'P1', text: 'Create automated rollback procedure for database changes' });
+    }
+    if (lower.includes('auth') || lower.includes('security') || lower.includes('permission')) {
+        items.push({ priority: 'P0', text: 'Conduct security audit of all authentication endpoints' });
+    }
+    items.push({ priority: 'P1', text: 'Add specific alerting for this failure mode with <5 minute detection SLA' });
+    items.push({ priority: 'P1', text: 'Create/update runbook with step-by-step remediation for this incident type' });
+    items.push({ priority: 'P2', text: 'Schedule blameless post-mortem meeting with all stakeholders within 72 hours' });
+    items.push({ priority: 'P2', text: 'Add load testing for the affected service to CI/CD pipeline' });
+    return items.map(item => `<div class="pm-action-item"><span class="pm-action-priority ${item.priority.toLowerCase()}">${item.priority}</span><span>${item.text}</span></div>`).join('');
+}
+
+function generateLessons(rootCause, whatBroke) {
+    const lessons = [];
+    lessons.push('• <strong>What went well:</strong> Incident was detected by monitoring (not user reports). Team mobilised quickly and communicated status.');
+    lessons.push('• <strong>What went wrong:</strong> The change that caused the incident was not caught by existing test coverage or review process.');
+    lessons.push('• <strong>Where we got lucky:</strong> The blast radius could have been larger if this occurred during peak traffic hours.');
+    lessons.push('• <strong>Key takeaway:</strong> Any change that touches data or infrastructure should require a mandatory canary deployment phase before full rollout.');
+    return lessons.join('<br><br>');
+}
+
+function downloadPostMortem() {
+    const output = document.getElementById('pmOutput');
+    if (!output) return;
+    const text = output.innerText;
+    const blob = new Blob([text], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `post-mortem-${Date.now().toString(36)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Post-Mortem downloaded as .md file! 📄');
+}
+
+/* ==============================================
+   RUBBER DUCK MODE
+   ============================================== */
+
+const duckDemos = {
+    'infinite-loop': 'My React component re-renders infinitely when I add a useEffect that calls an API and updates state. The page freezes within seconds.',
+    'state-bug': 'I\'m updating a state variable in a click handler but when I console.log it right after setState, it still shows the old value. The UI shows the right value though.',
+    'api-fail': 'My fetch call to /api/dashboard returns 403 Forbidden in production but works perfectly on localhost. I\'m sending the auth token in the headers.',
+};
+
+const duckQuestions = {
+    'infinite-loop': [
+        { q: '**What changes exactly when this effect runs?** List every piece of state or prop that gets modified inside your useEffect. Does the effect\'s dependency array include any of those modified values?', insight: 'You\'re looking for circular dependencies: effect changes X → X is in dependency array → effect re-runs → changes X again → infinite.' },
+        { q: '**What would happen if you commented out the setState call** inside the useEffect? Would the re-renders stop? If yes, the problem is that your effect both reads and writes the same state cycle.', insight: 'The mental model: useEffect with a state setter that triggers its own dependency = infinite loop. Every time.' },
+        { q: '**When should this data actually be fetched?** Only once on mount? On every route change? On a button click? Write the exact words: \"This API call should happen when ___\"', insight: 'If the answer is "once on mount," your dependency array should be []. If it\'s on specific changes, those specific values — and nothing else — go in the array.' },
+        { q: '**Can you separate the fetch from the render trigger?** What if the API call result went into a ref first, and only updated state when the data actually changed (using a comparison)?', insight: 'Pattern: fetch → compare with previous → only setState if different. Or use useCallback/useMemo to stabilise the values in your dependency array.' },
+    ],
+    'state-bug': [
+        { q: '**Where exactly did you put the console.log?** Is it on the line immediately after setState? In React, state updates are asynchronous and batched — the new value isn\'t available on the next line.', insight: 'setState doesn\'t mutate the current variable. It schedules a re-render with the new value. The closure still has the old one.' },
+        { q: '**If the UI shows the correct value, what does that tell you?** The component IS re-rendering with the right state — so the update works. The only question is: why does your log show the old value?', insight: 'Closures. The console.log captures the state value from the current render. The next render hasn\'t happened yet when log runs.' },
+        { q: '**How would you verify the state after it updates?** Can you think of a React hook that runs AFTER state changes are applied to the DOM?', insight: 'useEffect with the state variable in its dependency array runs after the re-render — that\'s where you\'d log the new value.' },
+        { q: '**What would this code look like if you used the functional update form?** Instead of setState(newValue), try setState(prev => { console.log(prev); return newValue; }). What does prev show you?', insight: 'The functional form (prev => newValue) always gets the latest state. It\'s also batching-safe. This is the pattern you want.' },
+    ],
+    'api-fail': [
+        { q: '**What\'s different about your production environment?** List 3 things that are different between localhost and production: URLs, domains, proxy settings, CORS config, cookie policies...', insight: 'localhost often bypasses security policies that production enforces. The 403 is the server rejecting auth, not a network error.' },
+        { q: '**Is the token actually reaching the server?** Open DevTools → Network tab → click the failed request → look at Request Headers. Is the Authorization header present? Is the token complete or truncated?', insight: 'If the header is missing, it\'s a client-side issue (cookie not sent cross-origin, or header not set). If present but rejected, it\'s a server-side validation issue.' },
+        { q: '**Does your production server have a different auth configuration?** Different JWT secret, different allowed origins, different token issuer? What returns 403 specifically — middleware, API gateway, or your route handler?', insight: 'Check: same JWT_SECRET env var in production? CORS configuration allowing the production origin? Token not expired? Check server logs for the exact rejection reason.' },
+        { q: '**Can you make the same request using curl from the production server itself?** If curl with the token works from the server but the browser fails, it\'s a CORS/cookie/preflight issue. If curl also fails, it\'s the token itself.', insight: 'curl localhost:3000/api/dashboard -H "Authorization: Bearer <token>" — this isolates browser vs. server issues instantly.' },
+    ],
+};
+
+const genericDuckQuestions = [
+    { q: '**What exactly did you expect to happen?** Write it out in one sentence. Then write what actually happens. The gap between these two sentences is your real bug.', insight: 'Precision matters. "It doesn\'t work" has no information. "I expected X but got Y" immediately narrows the search.' },
+    { q: '**What was the last thing you changed before this broke?** Not what you think caused it — what literally was the last git diff, the last edit, the last config change?', insight: 'The most recent change is statistically the most likely cause. Check your git diff, undo it, verify the bug disappears.' },
+    { q: '**If you had to explain this code to a new junior dev, what\'s the one part you\'d skip over?** That\'s probably where the bug is. The part you don\'t fully understand is the part that misbehaves.', insight: 'We gloss over what we don\'t understand. The bug lives in the gaps of our mental model. Shine a light there.' },
+    { q: '**What assumptions are you making that you haven\'t verified?** "The API returns an array" — have you checked? "This function is async" — is it? "The env variable is set" — console.log it.', insight: 'Every assumption is a potential bug. Verify the top 3 assumptions right now: log them, inspect them, prove them true.' },
+];
+
+let duckState = { step: 0, questions: [], problem: '' };
+
+function initRubberDuck() {
+    document.getElementById('duckStartBtn')?.addEventListener('click', () => {
+        const problem = document.getElementById('duckProblem').value.trim();
+        if (!problem) { showToast('Describe what you\'re stuck on first'); return; }
+        startDuckSession(problem);
+    });
+
+    document.getElementById('duckReplyBtn')?.addEventListener('click', duckReply);
+    document.getElementById('duckRestartBtn')?.addEventListener('click', resetDuckSession);
+
+    document.getElementById('duckInput')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            duckReply();
+        }
+    });
+
+    document.querySelectorAll('.duck-demo-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const demo = duckDemos[chip.dataset.demo];
+            if (demo) {
+                document.getElementById('duckProblem').value = demo;
+                startDuckSession(demo);
+            }
+        });
+    });
+}
+
+function startDuckSession(problem) {
+    duckState = { step: 0, questions: [], problem };
+
+    // Pick questions based on problem
+    const lower = problem.toLowerCase();
+    if (lower.includes('re-render') || lower.includes('infinite') || lower.includes('useeffect') || lower.includes('loop')) {
+        duckState.questions = duckQuestions['infinite-loop'];
+    } else if (lower.includes('state') && (lower.includes('old') || lower.includes('not updating') || lower.includes('stale') || lower.includes('console.log'))) {
+        duckState.questions = duckQuestions['state-bug'];
+    } else if (lower.includes('403') || lower.includes('401') || (lower.includes('api') && (lower.includes('fail') || lower.includes('forbidden') || lower.includes('unauthorized')))) {
+        duckState.questions = duckQuestions['api-fail'];
+    } else {
+        duckState.questions = genericDuckQuestions;
+    }
+
+    document.getElementById('duckStart').style.display = 'none';
+    document.getElementById('duckConversation').style.display = 'flex';
+    document.getElementById('duckComplete').style.display = 'none';
+    document.getElementById('duckInputArea').style.display = 'flex';
+
+    const messages = document.getElementById('duckMessages');
+    messages.innerHTML = '';
+
+    // Show duck intro
+    addDuckMessage('duck', `🦆 Thanks for sharing. I've read your problem — now I'm going to ask you 4 questions. I won't give you the answer. Instead, **think through each one carefully** before replying. Most developers find their own answer by question 3.`);
+
+    // Show user's problem
+    addDuckMessage('user', problem);
+
+    // Ask first question
+    setTimeout(() => {
+        askDuckQuestion();
+    }, 600);
+
+    updateDuckProgress();
+    addActivity('🦆 Rubber Duck session started');
+}
+
+function askDuckQuestion() {
+    if (duckState.step >= duckState.questions.length) {
+        completeDuckSession();
+        return;
+    }
+
+    const q = duckState.questions[duckState.step];
+    addDuckMessage('duck', q.q);
+    document.getElementById('duckInput').focus();
+}
+
+function duckReply() {
+    const input = document.getElementById('duckInput');
+    const text = input.value.trim();
+    if (!text) { showToast('Think about it and type your answer'); return; }
+
+    addDuckMessage('user', text);
+    input.value = '';
+
+    // Show insight for previous question
+    const q = duckState.questions[duckState.step];
+    setTimeout(() => {
+        addDuckMessage('duck', `💡 *Insight:* ${q.insight}`);
+
+        duckState.step++;
+        updateDuckProgress();
+
+        if (duckState.step >= duckState.questions.length) {
+            setTimeout(() => completeDuckSession(), 800);
+        } else {
+            setTimeout(() => askDuckQuestion(), 800);
+        }
+    }, 500);
+}
+
+function addDuckMessage(type, text) {
+    const messages = document.getElementById('duckMessages');
+    const msg = document.createElement('div');
+    msg.className = `duck-msg ${type}`;
+    msg.innerHTML = `
+        <div class="duck-msg-header">${type === 'duck' ? '🦆 Rubber Duck' : '👤 You'}</div>
+        <div class="duck-msg-text">${formatMessage(text)}</div>
+    `;
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function updateDuckProgress() {
+    const steps = document.querySelectorAll('.duck-step');
+    steps.forEach((s, i) => {
+        s.classList.remove('active', 'done');
+        if (i < duckState.step) s.classList.add('done');
+        else if (i === duckState.step) s.classList.add('active');
+    });
+    const fill = document.getElementById('duckProgressFill');
+    fill.style.width = (duckState.step / duckState.questions.length * 100) + '%';
+}
+
+function completeDuckSession() {
+    document.getElementById('duckInputArea').style.display = 'none';
+    document.getElementById('duckComplete').style.display = 'block';
+
+    document.querySelectorAll('.duck-step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+    document.getElementById('duckProgressFill').style.width = '100%';
+
+    document.getElementById('duckCompleteSummary').innerHTML = `You answered all 4 questions about: "<em>${duckState.problem.substring(0, 80)}...</em>"<br><br>If you found your answer — great, that's the power of structured thinking. If not, take these insights to the <strong>Emergency Chat</strong> tab and let AI help with the specific blocker you've identified.`;
+
+    addActivity('🦆 Rubber Duck session complete — 4/4 questions answered');
+}
+
+function resetDuckSession() {
+    document.getElementById('duckStart').style.display = 'flex';
+    document.getElementById('duckConversation').style.display = 'none';
+    document.getElementById('duckProblem').value = '';
+    document.querySelectorAll('.duck-step').forEach(s => { s.classList.remove('active', 'done'); });
+    document.getElementById('duckProgressFill').style.width = '0%';
+    duckState = { step: 0, questions: [], problem: '' };
+}
+
+/* ==============================================
+   GLOBAL UI HANDLERS
+   ============================================== */
+
+/* ── Chat Header Action Buttons (📞📹🖥️) + Attach ── */
+function initChatHeaderActions() {
+    document.querySelectorAll('.chat-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const title = btn.getAttribute('title') || 'Action';
+            showToast(`${title} connecting... (demo mode)`);
+            addActivity(`📡 ${title} requested`);
+        });
+    });
+
+    const attachBtn = document.querySelector('.attach-btn');
+    if (attachBtn) {
+        attachBtn.addEventListener('click', () => {
+            showToast('File attachment — drag & drop or paste code directly into the chat');
+            addActivity('📎 File attach triggered');
+        });
+    }
+}
+
+/* ── Knowledge Base Search ── */
+function initKBSearch() {
+    const input = document.querySelector('.kb-search-input');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        const query = input.value.toLowerCase().trim();
+        document.querySelectorAll('.kb-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = (!query || text.includes(query)) ? 'flex' : 'none';
+        });
+    });
+
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const visible = document.querySelectorAll('.kb-item[style*="flex"], .kb-item:not([style])');
+            showToast(`Knowledge Base: ${visible.length} result${visible.length !== 1 ? 's' : ''} found`);
+        }
+    });
+}
+
+/* ── Language Selector ── */
+function initLanguageSelector() {
+    const select = document.querySelector('.language-select');
+    if (!select) return;
+
+    select.addEventListener('change', () => {
+        const lang = select.options[select.selectedIndex].text;
+        showToast(`Language switched to ${lang} (demo mode)`);
+        addActivity(`🌐 Language changed: ${lang}`);
+    });
 }

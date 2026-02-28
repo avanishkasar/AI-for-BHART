@@ -28,6 +28,9 @@
                 <button class="dash-tab" data-tab="ancestry">🌳 Error Ancestry</button>
                 <button class="dash-tab" data-tab="capsule">🧬 Context Capsule</button>
                 <button class="dash-tab" data-tab="mentor">🦉 Quiet Mentor</button>
+                <button class="dash-tab" data-tab="commitrisk">⚡ Commit Risk</button>
+                <button class="dash-tab" data-tab="postmortem">📋 Post-Mortem</button>
+                <button class="dash-tab" data-tab="rubberduck">🦆 Rubber Duck</button>
             </div>
             <div class="dash-nav-right">
                 <div class="nav-stat-mini">
@@ -290,6 +293,157 @@ function processOrders(orders) {
                         <h4>📅 Past Debriefs</h4>
                         <div id="mentorHistory">
                             <div class="empty-state-small">No debriefs yet. Paste your first session above.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Commit Risk Predictor -->
+            <div class="tab-panel" id="tab-commitrisk">
+                <div class="feature-panel glass-card">
+                    <div class="feature-panel-header">
+                        <div class="feature-panel-icon">⚡</div>
+                        <div>
+                            <h2>Commit Risk Predictor</h2>
+                            <p>Paste a diff before you push. AI scores the risk of this commit breaking production — with specific line-level warnings.</p>
+                        </div>
+                    </div>
+                    <div class="commitrisk-input-row">
+                        <textarea id="commitriskInput" class="feature-input feature-textarea" placeholder="Paste your git diff or code changes here...
+Example:
+- const timeout = 30000;
++ const timeout = 100;
+
++ app.delete('/api/users/:id', (req, res) => {
++   db.query('DELETE FROM users WHERE id=' + req.params.id);
++ });
+
+- if (user.role === 'admin') {
++ // if (user.role === 'admin') {
+    return res.json(secrets);
+- }"></textarea>
+                        <div class="commitrisk-actions">
+                            <button class="btn btn-primary" id="commitriskAnalyzeBtn"><span>⚡</span> Predict Risk</button>
+                            <div class="commitrisk-chips">
+                                <button class="suggestion-chip cr-demo-chip" data-demo="sql-injection">SQL Injection</button>
+                                <button class="suggestion-chip cr-demo-chip" data-demo="auth-bypass">Auth Bypass</button>
+                                <button class="suggestion-chip cr-demo-chip" data-demo="perf-regression">Perf Regression</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="commitrisk-result" id="commitriskResult" style="display:none;">
+                        <div class="commitrisk-score-section">
+                            <div class="commitrisk-meter">
+                                <div class="commitrisk-meter-fill" id="commitriskMeterFill"></div>
+                                <div class="commitrisk-meter-labels">
+                                    <span>SAFE</span><span>LOW</span><span>MEDIUM</span><span>HIGH</span><span>CRITICAL</span>
+                                </div>
+                            </div>
+                            <div class="commitrisk-score-display">
+                                <span class="commitrisk-score-num" id="commitriskScoreNum">0</span>
+                                <span class="commitrisk-score-label">/100 Risk</span>
+                                <span class="commitrisk-verdict" id="commitriskVerdict">Calculating...</span>
+                            </div>
+                        </div>
+                        <div class="commitrisk-warnings" id="commitriskWarnings"></div>
+                        <div class="commitrisk-summary glass-card-inner" id="commitriskSummary"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Incident Post-Mortem Generator -->
+            <div class="tab-panel" id="tab-postmortem">
+                <div class="feature-panel glass-card">
+                    <div class="feature-panel-header">
+                        <div class="feature-panel-icon">📋</div>
+                        <div>
+                            <h2>Incident Post-Mortem Generator</h2>
+                            <p>What took your team 3 hours to write now takes 30 seconds. Describe the incident — AI generates a professional post-mortem document.</p>
+                        </div>
+                    </div>
+                    <div class="postmortem-form">
+                        <div class="capsule-field">
+                            <label>What broke?</label>
+                            <input type="text" id="pmWhatBroke" class="feature-input" placeholder="e.g. Payment processing API returned 500 for all users">
+                        </div>
+                        <div class="capsule-field">
+                            <label>When did it start & how long?</label>
+                            <div class="pm-time-row">
+                                <input type="text" id="pmWhen" class="feature-input" placeholder="e.g. Feb 28, 2:15 PM IST">
+                                <input type="text" id="pmDuration" class="feature-input" placeholder="e.g. 47 minutes">
+                            </div>
+                        </div>
+                        <div class="capsule-field">
+                            <label>What was the root cause?</label>
+                            <textarea id="pmRootCause" class="feature-input feature-textarea-sm" placeholder="e.g. A database migration removed the payments index, causing full table scans that timed out under load"></textarea>
+                        </div>
+                        <div class="capsule-field">
+                            <label>How was it fixed?</label>
+                            <textarea id="pmFix" class="feature-input feature-textarea-sm" placeholder="e.g. Rolled back the migration, re-applied with the index preserved"></textarea>
+                        </div>
+                        <div class="capsule-field">
+                            <label>Impact (who was affected?)</label>
+                            <input type="text" id="pmImpact" class="feature-input" placeholder="e.g. ~12,000 users, $45K revenue impact, 3 SLA breaches">
+                        </div>
+                        <button class="btn btn-primary" id="pmGenerateBtn"><span>📋</span> Generate Post-Mortem</button>
+                    </div>
+                    <div class="postmortem-result" id="pmResult" style="display:none;">
+                        <div class="postmortem-output glass-card-inner" id="pmOutput"></div>
+                        <div class="pm-actions">
+                            <button class="btn btn-outline" id="pmCopyBtn">📋 Copy Document</button>
+                            <button class="btn btn-outline" id="pmDownloadBtn">💾 Download .md</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Rubber Duck Mode -->
+            <div class="tab-panel" id="tab-rubberduck">
+                <div class="feature-panel glass-card">
+                    <div class="feature-panel-header">
+                        <div class="feature-panel-icon">🦆</div>
+                        <div>
+                            <h2>Rubber Duck Mode</h2>
+                            <p>Stuck but don't know why? AI won't give you the answer — it asks you 4 guided questions to help you find it yourself. Learning by thinking, not copying.</p>
+                        </div>
+                    </div>
+                    <div class="duck-session" id="duckSession">
+                        <div class="duck-start" id="duckStart">
+                            <div class="duck-icon-big">🦆</div>
+                            <h3>Ready to think out loud?</h3>
+                            <p>Describe your problem and I'll guide you through 4 focused questions. No answers — just the right prompts to unlock your own solution.</p>
+                            <div class="capsule-field" style="width:100%;">
+                                <label>What are you stuck on?</label>
+                                <textarea id="duckProblem" class="feature-input feature-textarea-sm" placeholder="e.g. My React component re-renders infinitely when I add a useEffect that calls an API..."></textarea>
+                            </div>
+                            <button class="btn btn-primary" id="duckStartBtn"><span>🦆</span> Start Session</button>
+                            <div class="duck-demo-chips">
+                                <button class="suggestion-chip duck-demo-chip" data-demo="infinite-loop">Infinite re-render</button>
+                                <button class="suggestion-chip duck-demo-chip" data-demo="state-bug">State not updating</button>
+                                <button class="suggestion-chip duck-demo-chip" data-demo="api-fail">API returns 403</button>
+                            </div>
+                        </div>
+                        <div class="duck-conversation" id="duckConversation" style="display:none;">
+                            <div class="duck-progress">
+                                <div class="duck-progress-steps">
+                                    <div class="duck-step active" data-step="1">1</div>
+                                    <div class="duck-step" data-step="2">2</div>
+                                    <div class="duck-step" data-step="3">3</div>
+                                    <div class="duck-step" data-step="4">4</div>
+                                </div>
+                                <div class="duck-progress-bar"><div class="duck-progress-fill" id="duckProgressFill"></div></div>
+                            </div>
+                            <div class="duck-messages" id="duckMessages"></div>
+                            <div class="duck-input-area" id="duckInputArea">
+                                <textarea id="duckInput" class="feature-input feature-textarea-sm" placeholder="Think about it... then type your answer here"></textarea>
+                                <button class="btn btn-primary" id="duckReplyBtn"><span>💬</span> Reply</button>
+                            </div>
+                            <div class="duck-complete" id="duckComplete" style="display:none;">
+                                <div class="duck-complete-icon">🎉</div>
+                                <h3>Session Complete!</h3>
+                                <p id="duckCompleteSummary"></p>
+                                <button class="btn btn-primary" id="duckRestartBtn"><span>🦆</span> New Session</button>
+                            </div>
                         </div>
                     </div>
                 </div>
