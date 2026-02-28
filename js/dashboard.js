@@ -172,15 +172,22 @@ function sendMessage() {
     // Show typing indicator then respond
     showTypingIndicator();
     
-    setTimeout(() => {
+    // Try API first, fall back to hardcoded
+    callRescueAPI('chat', text).then(apiResult => {
+        removeTypingIndicator();
+        const response = apiResult.fromAPI ? apiResult.response : generateAIResponse(text);
+        addMessage('ai', response);
+        addActivity(`🤖 AI response generated${apiResult.fromAPI ? ' (Bedrock)' : ''}`);
+        state.resolvedCount++;
+        updateCounters();
+    }).catch(() => {
         removeTypingIndicator();
         const response = generateAIResponse(text);
         addMessage('ai', response);
         addActivity('🤖 AI response generated');
-        
         state.resolvedCount++;
         updateCounters();
-    }, 1500 + Math.random() * 1500);
+    });
 }
 
 function addMessage(type, content) {
@@ -554,20 +561,28 @@ function initDependencyAnalyzer() {
     });
 }
 
-function analyzeDependency(pkg) {
+async function analyzeDependency(pkg) {
     if (!pkg) { showToast('Enter a package name first'); return; }
 
     const result = document.getElementById('depResult');
-    const data = depDatabase[pkg.toLowerCase()] || {
-        score: Math.floor(Math.random() * 50) + 15,
-        lastCommit: (Math.floor(Math.random() * 12) + 1) + ' months ago',
-        cves: Math.floor(Math.random() * 3),
-        busFactor: Math.floor(Math.random() * 5) + 1,
-        weeklyDownloads: (Math.random() * 8 + 0.5).toFixed(1) + 'M',
-        abandoned: Math.random() > 0.6,
-        modern: null,
-        reason: 'Package analyzed. No entry in our known-risk database — monitor regularly for CVEs and abandoned status.',
-    };
+    
+    // Try API first
+    let data;
+    const apiResult = await callRescueAPI('dependency', pkg);
+    if (apiResult.fromAPI && apiResult.structured) {
+        data = apiResult.response;
+    } else {
+        data = depDatabase[pkg.toLowerCase()] || {
+            score: Math.floor(Math.random() * 50) + 15,
+            lastCommit: (Math.floor(Math.random() * 12) + 1) + ' months ago',
+            cves: Math.floor(Math.random() * 3),
+            busFactor: Math.floor(Math.random() * 5) + 1,
+            weeklyDownloads: (Math.random() * 8 + 0.5).toFixed(1) + 'M',
+            abandoned: Math.random() > 0.6,
+            modern: null,
+            reason: 'Package analyzed. No entry in our known-risk database — monitor regularly for CVEs and abandoned status.',
+        };
+    }
 
     result.style.display = 'flex';
 
@@ -654,12 +669,20 @@ function initAncestryTree() {
     });
 }
 
-function buildAncestryTree(stackTrace) {
+async function buildAncestryTree(stackTrace) {
     const lower = stackTrace.toLowerCase();
     const result = document.getElementById('ancestryResult');
     const tree = document.getElementById('ancestryTree');
     result.style.display = 'block';
     tree.innerHTML = '';
+
+    // Try API first
+    const apiResult = await callRescueAPI('ancestry', stackTrace);
+    if (apiResult.fromAPI && apiResult.structured && Array.isArray(apiResult.response)) {
+        renderAncestryNodes(tree, apiResult.response);
+        addActivity('🌳 Error ancestry traced (Bedrock) — root decision identified');
+        return;
+    }
 
     const hasNull    = lower.includes('undefined') || lower.includes('null') || lower.includes('cannot read');
     const hasAsync   = lower.includes('async') || lower.includes('await') || lower.includes('promise') || lower.includes('unhandled');
@@ -715,6 +738,11 @@ function buildAncestryTree(stackTrace) {
         ];
     }
 
+    renderAncestryNodes(tree, nodes);
+    addActivity('🌳 Error ancestry traced — root decision identified');
+}
+
+function renderAncestryNodes(tree, nodes) {
     const typeMap = { root: '🔴', cause: '🟠', origin: '🟡', decision: '🔵' };
 
     nodes.forEach((node, i) => {
@@ -731,14 +759,12 @@ function buildAncestryTree(stackTrace) {
         el.innerHTML = `
             <div class="tree-node-card">
                 <div class="tree-node-type">${['Surface Error', 'Propagation Layer', 'Origin Gap', 'Root Decision'][i]}</div>
-                <div class="tree-node-title">${typeMap[node.type]} ${node.label}</div>
+                <div class="tree-node-title">${typeMap[node.type] || '🔴'} ${node.label}</div>
                 <div class="tree-node-desc">${node.desc}</div>
                 ${node.file ? `<div class="tree-node-file">📍 ${node.file}</div>` : ''}
             </div>`;
         tree.appendChild(el);
     });
-
-    addActivity('🌳 Error ancestry traced — root decision identified');
 }
 
 /* ── Context Capsule ── */
@@ -754,7 +780,7 @@ function initContextCapsule() {
     });
 }
 
-function generateCapsule() {
+async function generateCapsule() {
     const feature  = document.getElementById('capsuleFeature').value.trim() || 'Untitled Feature';
     const what     = document.getElementById('capsuleWhat').value.trim();
     const failed   = document.getElementById('capsuleFailed').value.trim();
@@ -765,6 +791,14 @@ function generateCapsule() {
     const result = document.getElementById('capsuleResult');
     const output = document.getElementById('capsuleOutput');
     result.style.display = 'flex';
+
+    // Try API first
+    const apiResult = await callRescueAPI('capsule', what, { feature, failed, nextDev });
+    if (apiResult.fromAPI && apiResult.response) {
+        output.innerHTML = formatMessage(apiResult.response);
+        addActivity(`🧬 Context Capsule generated (Bedrock): <strong>${feature}</strong>`);
+        return;
+    }
 
     const timestamp = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
     const tags = generateCapsuleTags(what + ' ' + failed);
@@ -828,11 +862,39 @@ function initQuietMentor() {
     });
 }
 
-function generateMentorDebrief(code) {
+async function generateMentorDebrief(code) {
     const result  = document.getElementById('mentorResult');
     const debrief = document.getElementById('mentorDebrief');
     result.style.display = 'block';
     debrief.innerHTML = '';
+
+    // Try API first
+    const apiResult = await callRescueAPI('mentor', code);
+    if (apiResult.fromAPI && apiResult.structured && Array.isArray(apiResult.response)) {
+        apiResult.response.slice(0, 4).forEach((obs, i) => {
+            const item = document.createElement('div');
+            item.className = `mentor-insight ${obs.type}`;
+            item.style.animationDelay = (i * 0.18) + 's';
+            item.innerHTML = `
+                <div class="mentor-insight-icon">${obs.icon}</div>
+                <div class="mentor-insight-body">
+                    <div class="mentor-insight-title">${obs.title}</div>
+                    <div class="mentor-insight-text">${obs.text}</div>
+                    ${obs.code ? `<div class="mentor-insight-code">${obs.code}</div>` : ''}
+                </div>`;
+            debrief.appendChild(item);
+        });
+        const lines = code.split('\n').length;
+        const history = document.getElementById('mentorHistory');
+        const emptyEl = history.querySelector('.empty-state-small');
+        if (emptyEl) emptyEl.remove();
+        const entry = document.createElement('div');
+        entry.className = 'mentor-history-item';
+        entry.innerHTML = `<span>🦉</span><span style="flex:1;">Session at ${formatTime(new Date())} — ${lines} lines, ${Math.min(apiResult.response.length, 4)} insights (Bedrock)</span>`;
+        history.insertBefore(entry, history.firstChild);
+        addActivity(`🦉 Mentor debrief done (Bedrock) — ${Math.min(apiResult.response.length, 4)} insights`);
+        return;
+    }
 
     const lower = code.toLowerCase();
     const lines = code.split('\n').length;
@@ -1019,10 +1081,17 @@ function initCommitRisk() {
     });
 }
 
-function analyzeCommitRisk(diff) {
+async function analyzeCommitRisk(diff) {
     const lower = diff.toLowerCase();
     const result = document.getElementById('commitriskResult');
     result.style.display = 'flex';
+
+    // Try API first
+    const apiResult = await callRescueAPI('commitrisk', diff);
+    if (apiResult.fromAPI && apiResult.structured && apiResult.response.score !== undefined) {
+        renderCommitRiskResult(apiResult.response);
+        return;
+    }
 
     const warnings = [];
     let score = 5; // base risk
@@ -1156,6 +1225,46 @@ function analyzeCommitRisk(diff) {
     addActivity(`⚡ Commit risk analyzed — Score: ${score}/100 (${warnings.length} issues)`);
 }
 
+function renderCommitRiskResult(data) {
+    const score = Math.min(data.score, 98);
+    const warnings = data.warnings || [];
+    const scoreColor = score >= 75 ? '#ff3b5c' : score >= 50 ? '#ff9100' : score >= 25 ? '#ffcc00' : '#00e676';
+    const verdict = data.verdict || (score >= 75 ? '🚫 DO NOT MERGE' : score >= 50 ? '⚠️ HIGH RISK' : score >= 25 ? '⚡ CAUTION' : '✅ SAFE TO MERGE');
+    const verdictBg = score >= 75 ? 'rgba(255,59,92,0.15)' : score >= 50 ? 'rgba(255,145,0,0.15)' : score >= 25 ? 'rgba(255,204,0,0.12)' : 'rgba(0,230,118,0.12)';
+
+    document.getElementById('commitriskScoreNum').textContent = score;
+    document.getElementById('commitriskScoreNum').style.color = scoreColor;
+    const verdictEl = document.getElementById('commitriskVerdict');
+    verdictEl.textContent = verdict;
+    verdictEl.style.color = scoreColor;
+    verdictEl.style.background = verdictBg;
+
+    const meterFill = document.getElementById('commitriskMeterFill');
+    setTimeout(() => {
+        meterFill.style.cssText = `position:relative;overflow:hidden;height:12px;border-radius:6px;background:linear-gradient(90deg,#00e676 0%,#ffcc00 35%,#ff9100 60%,#ff3b5c 85%,#d50000 100%);`;
+        meterFill.innerHTML = `<div style="position:absolute;top:0;right:0;height:100%;width:${100-score}%;background:rgba(10,10,15,0.85);border-radius:0 6px 6px 0;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);"></div>`;
+    }, 50);
+
+    const warningsEl = document.getElementById('commitriskWarnings');
+    warningsEl.innerHTML = '';
+    warnings.forEach((w, i) => {
+        const el = document.createElement('div');
+        el.className = `cr-warning ${w.severity}`;
+        el.style.animationDelay = (i * 0.12) + 's';
+        el.innerHTML = `
+            <div class="cr-warning-icon">${w.icon}</div>
+            <div class="cr-warning-body">
+                <div class="cr-warning-title">${w.title}</div>
+                <div class="cr-warning-text">${w.text}</div>
+                ${w.line ? `<div class="cr-warning-line">📍 ${w.line}</div>` : ''}
+            </div>`;
+        warningsEl.appendChild(el);
+    });
+
+    document.getElementById('commitriskSummary').innerHTML = data.summary || `<strong>📊 Risk Summary:</strong> ${warnings.length} issue(s) found. Score: ${score}/100.`;
+    addActivity(`⚡ Commit risk analyzed (Bedrock) — Score: ${score}/100`);
+}
+
 /* ==============================================
    INCIDENT POST-MORTEM GENERATOR
    ============================================== */
@@ -1173,7 +1282,7 @@ function initPostMortem() {
     document.getElementById('pmDownloadBtn')?.addEventListener('click', downloadPostMortem);
 }
 
-function generatePostMortem() {
+async function generatePostMortem() {
     const whatBroke  = document.getElementById('pmWhatBroke').value.trim();
     const when       = document.getElementById('pmWhen').value.trim() || 'Not specified';
     const duration   = document.getElementById('pmDuration').value.trim() || 'Unknown';
@@ -1187,6 +1296,14 @@ function generatePostMortem() {
     const result = document.getElementById('pmResult');
     const output = document.getElementById('pmOutput');
     result.style.display = 'flex';
+
+    // Try API first
+    const apiResult = await callRescueAPI('postmortem', whatBroke, { when, duration, rootCause: rootCause, fix, impact });
+    if (apiResult.fromAPI && apiResult.response) {
+        output.innerHTML = formatMessage(apiResult.response);
+        addActivity(`📋 Post-Mortem generated (Bedrock): ${whatBroke.substring(0, 40)}`);
+        return;
+    }
 
     const severity = determinePMSeverity(whatBroke, impact);
     const sevColor = { 'SEV-1': 'var(--p0-color)', 'SEV-2': 'var(--p1-color)', 'SEV-3': 'var(--p2-color)' }[severity] || 'var(--p2-color)';
@@ -1416,19 +1533,27 @@ function initRubberDuck() {
     });
 }
 
-function startDuckSession(problem) {
+async function startDuckSession(problem) {
     duckState = { step: 0, questions: [], problem };
 
-    // Pick questions based on problem
-    const lower = problem.toLowerCase();
-    if (lower.includes('re-render') || lower.includes('infinite') || lower.includes('useeffect') || lower.includes('loop')) {
-        duckState.questions = duckQuestions['infinite-loop'];
-    } else if (lower.includes('state') && (lower.includes('old') || lower.includes('not updating') || lower.includes('stale') || lower.includes('console.log'))) {
-        duckState.questions = duckQuestions['state-bug'];
-    } else if (lower.includes('403') || lower.includes('401') || (lower.includes('api') && (lower.includes('fail') || lower.includes('forbidden') || lower.includes('unauthorized')))) {
-        duckState.questions = duckQuestions['api-fail'];
-    } else {
-        duckState.questions = genericDuckQuestions;
+    // Try API first for questions
+    const apiResult = await callRescueAPI('rubberduck', problem);
+    if (apiResult.fromAPI && apiResult.structured && Array.isArray(apiResult.response) && apiResult.response.length === 4) {
+        duckState.questions = apiResult.response;
+    }
+
+    // Fall back to hardcoded if API didn't return questions
+    if (duckState.questions.length === 0) {
+        const lower = problem.toLowerCase();
+        if (lower.includes('re-render') || lower.includes('infinite') || lower.includes('useeffect') || lower.includes('loop')) {
+            duckState.questions = duckQuestions['infinite-loop'];
+        } else if (lower.includes('state') && (lower.includes('old') || lower.includes('not updating') || lower.includes('stale') || lower.includes('console.log'))) {
+            duckState.questions = duckQuestions['state-bug'];
+        } else if (lower.includes('403') || lower.includes('401') || (lower.includes('api') && (lower.includes('fail') || lower.includes('forbidden') || lower.includes('unauthorized')))) {
+            duckState.questions = duckQuestions['api-fail'];
+        } else {
+            duckState.questions = genericDuckQuestions;
+        }
     }
 
     document.getElementById('duckStart').style.display = 'none';
